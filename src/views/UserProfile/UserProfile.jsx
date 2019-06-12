@@ -84,7 +84,9 @@ class UserProfile extends React.Component {
 					Month:ths.currentTarget.value
 					});
 			}
-		}]
+		},{  
+      field:false
+    }]
 	}];
 
   const tileData = [

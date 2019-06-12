@@ -78,8 +78,9 @@ _handleSubmit(e) {
 	e.preventDefault();
 
 	let fetchurl = "http://10.165.7.169:3000/invoice/add" ;
-    
-	fetchApi(fetchurl,JSON.stringify({bill_no:this.state.billNO,bill_date:this.state.billDate,bill_amount:this.state.billAmount,bill_image:this.state.imagePreviewUrl})).then(data =>{
+
+
+	fetchApi(fetchurl,JSON.stringify({employee_no:this.state.empId,bill_no:this.state.billNO,bill_date:this.state.billDate,bill_amount:this.state.billAmount,bill_image:this.state.imagePreviewUrl})).then(data =>{
 				console.log(data);                            
 		});
 		
@@ -125,7 +126,29 @@ _handleSubmit(e) {
 					});
 			}
 		},{  
-			field:false
+			field:true,
+			label:"Bill No",
+			type:"text",
+			validateflag:false,
+			required:false,
+			value:this.state.billNO,
+			onChange:(ths)=> {
+				this.setState({
+					billNO:ths.currentTarget.value
+					});
+			}
+		},{  
+			field:true,
+			label:"Bill Amount",
+			type:"text",
+			validateflag:false,
+			required:false,
+			value:this.state.billAmount,
+			onChange:(ths)=> {
+				this.setState({
+					billAmount:ths.currentTarget.value
+					});
+			}
 		}]
 	},{
 		fields:[{ 
@@ -140,21 +163,7 @@ _handleSubmit(e) {
 					billMonth:ths.currentTarget.value
 					});
 			}
-		},{  
-			field:true,
-			label:"Bill No",
-			type:"text",
-			validateflag:false,
-			required:false,
-			value:this.state.billNO,
-			onChange:(ths)=> {
-				this.setState({
-					billNO:ths.currentTarget.value
-					});
-			}
-		}]
-	},{
-		fields:[{ 
+		},{ 
 			field:true,
 			label:"Bill Date",
 			validateflag:false,
@@ -168,17 +177,7 @@ _handleSubmit(e) {
 
 			}
 		},{  
-			field:true,
-			label:"Bill Amount",
-			type:"text",
-			validateflag:false,
-			required:false,
-			value:this.state.billAmount,
-			onChange:(ths)=> {
-				this.setState({
-					billAmount:ths.currentTarget.value
-					});
-			}
+			field:false
 		}]
 	}];
 
