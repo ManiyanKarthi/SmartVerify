@@ -9,17 +9,23 @@ import TextField from "@material-ui/core/TextField"
 import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import Dialog from '@material-ui/core/Dialog';
 
 class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
 		this.state = {billMonth:'', billNO: '', billDate:'', billAmount:''};
+		this.state.dialogStatus = false;
 		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"surname","type":"numeric"},{"title":"Bill No","field":"billNo","type":"numeric"},{"title":"Date","field":"Date","type":"date"},{"title":"Amount","field":"Amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.tableData = [{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"},{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"}];
 		this.state.monthData = this.generateBillMonth();
-
-		this._handleImageChange = this._handleImageChange.bind(this);
+		this.addNewBill = this.addNewBill.bind(this);
+		this.handleImageChange = this.handleImageChange.bind(this);
+		this.openDialog = this.openDialog.bind(this);
+		this.closeDialog = this.closeDialog.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 		this.textUpdate = this.textUpdate.bind(this);
 	}
@@ -32,49 +38,30 @@ class Dashboard extends React.Component {
 		let y = dt.getFullYear();
 		let currentMonth = month.splice(m);
 		let previousLoop = month.splice(0,m);
-
 		for(let i=0;i<currentMonth.length;i++){
 			list.push({"month":currentMonth[i], "year":y});
 		}
-
 		for(let i=0;i<previousLoop.length;i++){
 			list.push({"month":previousLoop[i], "year":y-1});
 		}
-
 		return {"curMonth": m, "monthList":list}
 	}
 
-	_handleSubmit(e) {
-
-		e.preventDefault();
-		// let fetchurl = "http://10.165.7.169:3000/invoice/add" ;
+	addNewBill(e) {
 		let paramObj = { 
 			bill_no:this.state.billNO,
 			bill_date:this.state.billDate,
 			bill_amount:this.state.billAmount,
 			bill_image:this.state.imagePreviewUrl
 		};
-
-		/*fetch(fetchurl, {
-			method: 'POST',
-			headers: {
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'//application/x-www-form-urlencoded
-			},
-			body: JSON.stringify(paramObj)
-		}).then(data =>{
-			console.log(data);
-		});*/
 		new FetchApi().addNewBill(JSON.stringify(paramObj), function(data){
 			console.log(data);
 		})
 	}
 
-	_handleImageChange(e) {
-		e.preventDefault();
+	handleImageChange(e) {
 		let reader = new FileReader();
 		let file = e.target.files[0];
-
 		reader.onloadend = () => {
 			this.setState({
 				file: file,
@@ -92,6 +79,14 @@ class Dashboard extends React.Component {
 			_this.setState("tableData", data);
 		});
 	}
+	
+	clearForm(e){
+
+	}
+	
+	smartVerify(e){
+
+	}
 
 	textUpdate(key, value){
 		let obj = {};
@@ -99,17 +94,19 @@ class Dashboard extends React.Component {
 		this.setState(obj);
 	}
   
-	render() {
+	openDialog(){
+		this.setState({"dialogStatus":true});
+	}
 
-		let imagePreviewUrl = this.state.imagePreviewUrl;
-		let imagePreview = null;
-		if (imagePreviewUrl) {
-			imagePreview = (<div className="imgPreview"><img src={imagePreviewUrl} alt={"Select input"}/></div>);
-		}
+	closeDialog(){
+		this.setState({"dialogStatus": false});
+	}
+
+	render() {
 
 		// <UIFieldsGeneral mapList={uiMap1}/>
 		return (
-			<Grid container xs={12}>
+			<Grid container>
 				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
 					<Grid item>
 						<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
@@ -135,42 +132,47 @@ class Dashboard extends React.Component {
 					</Grid>
 				</Grid>
 				<Grid item container xs={12}>
-					<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData} editable={false}/>
+					<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData}/>
 				</Grid>
-				<Grid item container xs={6} justify="center" className="UI_Form_Container" style={{"padding":"20px","marginLeft":"25%"}}>
-					<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-						<TextField label= {"Bill Month"} value={this.state.billMonth} onChange={(e) => {this.setState({"billMonth": e.currentTarget.value})}}/>
-					</Grid>
-					<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-						<TextField label= {"Bill No"} value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
-					</Grid>
-					<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-						<TextField label= {"Bill Date"} value={this.state.billDate} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
-					</Grid>
-					<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-						<TextField label= {"Bill Amount"} value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
-					</Grid>
-					<Grid item xs={12} style={{"textAlign":"center"}}>
-						<label>Bill Image </label>
-						<input className="fileInput" type="file" onChange={(e)=>this._handleImageChange(e)} />
-					</Grid>
-					<Grid item xs={12} style={{"textAlign":"center"}}>
-						{imagePreview}
-					</Grid>
-					<Grid item xs={12} style={{"textAlign":"center"}}>
-						<Button variant="contained" color="primary" onClick={(e)=>this._handleSubmit(e)} >
-							Add New Bill
-						</Button>&nbsp;&nbsp;
-						<Button variant="contained" color="success" onClick={(e)=>this._handleSubmit(e)} >
-							Smart Verify
-						</Button>&nbsp;&nbsp;
-						<Button variant="contained" color="alert" onClick={(e)=>this._handleSubmit(e)} >
-							Clear
-						</Button>
-					</Grid>
-				</Grid>
-				<Grid xs={12}>
-					
+				<Grid item xs={12}>
+					<div style={{"position":"fixed","right":"30px", "bottom":"30px"}}>
+						<Fab color="primary" aria-label="Add">
+							<AddIcon onClick={this.openDialog}/>
+						</Fab>
+					</div>
+					<div>
+						<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
+							<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
+								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+									<TextField label= {"Bill Type"} value={this.state.billType} onChange={(e) => {this.setState({"billType": e.currentTarget.value})}}/>
+								</Grid>
+								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+									<TextField label= {"Bill No"} value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
+								</Grid>
+								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+									<TextField label= {"Bill Date"} value={this.state.billDate} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
+								</Grid>
+								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+									<TextField label= {"Bill Amount"} value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
+								</Grid>
+								<Grid item xs={12} style={{"textAlign":"center"}}>
+									<label>Bill Image </label>
+									<input className="fileInput" type="file" onChange={(e)=>this.handleImageChange(e)} />
+								</Grid>
+								<Grid item xs={12} style={{"textAlign":"center"}}>
+									<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
+										Add New Bill
+									</Button>&nbsp;&nbsp;
+									<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} >
+										Smart Verify
+									</Button>&nbsp;&nbsp;
+									<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
+										Clear
+									</Button>
+								</Grid>
+							</Grid>
+						</Dialog>
+					</div>
 				</Grid>
 			</Grid>
 		);
