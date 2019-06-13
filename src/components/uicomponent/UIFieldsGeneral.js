@@ -1,6 +1,5 @@
 import React from 'react';
 import UIFields from './UIFields';
-import Grid from '@material-ui/core/Grid';
 class UIFieldsGeneral extends React.Component {
 
 

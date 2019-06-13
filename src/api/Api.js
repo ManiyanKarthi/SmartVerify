@@ -1,4 +1,3 @@
-import React from 'react';
 
 const fetchApi = (url,body,fetchData)=> {
         return fetch(url, {

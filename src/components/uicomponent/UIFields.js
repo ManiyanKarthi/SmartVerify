@@ -1,10 +1,6 @@
 import React from 'react';
 import TextField from "@material-ui/core/TextField"
-
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from "@material-ui/core/InputLabel";
 import Grid from '@material-ui/core/Grid';
-import Input from '@material-ui/core/Input';
 
 class UIFields extends React.Component {
 

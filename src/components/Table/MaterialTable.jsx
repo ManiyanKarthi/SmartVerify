@@ -4,9 +4,7 @@ import MaterialTable from 'material-table';
 
 class MaterialTableDemo extends React.Component {
 
-  
-  
-	constructor(props){
+  constructor(props){
     super(props);
       this.state={
         columns:props.columns,
@@ -20,18 +18,16 @@ class MaterialTableDemo extends React.Component {
         data:this.props.data
       })
   }
-
   
   render() {	
-	
-	  
-    return (<div style={{"paddingTop":"20px"}} >
-      <MaterialTable
-      title=""
-      columns={this.state.columns}
-      data={this.state.data}
-      editable={this.state.editable} onRowClick={this.props.onRowClick} 
-    /></div>
+    return (
+      <div style={{"paddingTop":"20px","width":"100%"}} >
+          <MaterialTable
+          title=""
+          columns={this.state.columns}
+          data={this.state.data}
+          editable={this.state.editable} onRowClick={this.props.onRowClick} />
+      </div>
     );
   }
 }
