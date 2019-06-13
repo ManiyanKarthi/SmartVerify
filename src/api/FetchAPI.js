@@ -9,8 +9,17 @@ function fetchData(url, method, body, callback) {
 
 class FetchApi {
 
+    constructor(props){
+        // this.baseurl = "http://10.165.7.169:3001";
+        this.baseurl = "http://localhost:3001";
+    }
+
     serachEmployeeDetails(data, callback){
-        fetchData("http://10.165.7.169:3000/invoice/getUserData", "POST", data, callback);
+        fetchData(this.baseurl + "/invoice/getUserData", "POST", data, callback);
+    }
+
+    addNewBill(data, callback){
+        fetchData(this.baseurl + "/invoice/add", "POST", data, callback);
     }
 
 }

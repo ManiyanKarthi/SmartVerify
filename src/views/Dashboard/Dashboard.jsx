@@ -47,7 +47,7 @@ class Dashboard extends React.Component {
 	_handleSubmit(e) {
 
 		e.preventDefault();
-		let fetchurl = "http://10.165.7.169:3000/invoice/add" ;
+		// let fetchurl = "http://10.165.7.169:3000/invoice/add" ;
 		let paramObj = { 
 			bill_no:this.state.billNO,
 			bill_date:this.state.billDate,
@@ -55,7 +55,7 @@ class Dashboard extends React.Component {
 			bill_image:this.state.imagePreviewUrl
 		};
 
-		fetch(fetchurl, {
+		/*fetch(fetchurl, {
 			method: 'POST',
 			headers: {
 			'Accept': 'application/json',
@@ -64,10 +64,10 @@ class Dashboard extends React.Component {
 			body: JSON.stringify(paramObj)
 		}).then(data =>{
 			console.log(data);
-		});
-		this.state.table.data.push({billNo: paramObj.bill_no, Date: paramObj.bill_date, Amount: paramObj.bill_amount});
-		this.setState({"table":this.state.table});
-		console.log('handle uploading-', this.state.file);
+		});*/
+		new FetchApi().addNewBill(JSON.stringify(paramObj), function(data){
+			console.log(data);
+		})
 	}
 
 	_handleImageChange(e) {
@@ -160,8 +160,17 @@ class Dashboard extends React.Component {
 					<Grid item xs={12} style={{"textAlign":"center"}}>
 						<Button variant="contained" color="primary" onClick={(e)=>this._handleSubmit(e)} >
 							Add New Bill
+						</Button>&nbsp;&nbsp;
+						<Button variant="contained" color="success" onClick={(e)=>this._handleSubmit(e)} >
+							Smart Verify
+						</Button>&nbsp;&nbsp;
+						<Button variant="contained" color="alert" onClick={(e)=>this._handleSubmit(e)} >
+							Clear
 						</Button>
 					</Grid>
+				</Grid>
+				<Grid xs={12}>
+					
 				</Grid>
 			</Grid>
 		);
