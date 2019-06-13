@@ -4,7 +4,7 @@ const fetchApi = (url,body,fetchData)=> {
                     method: 'POST',
                     headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'//application/x-www-form-urlencoded
                     },
                     body: body
                 }).then(res => res.json());
