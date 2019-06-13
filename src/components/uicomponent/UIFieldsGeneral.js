@@ -2,9 +2,7 @@ import React from 'react';
 import UIFields from './UIFields';
 class UIFieldsGeneral extends React.Component {
 
-
-    render() {
-
+  render() {
         return (
           <div style={{"paddingTop":"50px","textAlign":"center"}} >
                       {this.props.mapList.map((r,i) =>{

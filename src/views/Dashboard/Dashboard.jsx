@@ -5,23 +5,48 @@ import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardS
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import MaterialTableDemo from "../../components/Table/MaterialTable.jsx";
-import fetchApi from "../../api/Api";
 import TextField from "@material-ui/core/TextField"
-import CSS from "../../assets/css/previewimage.css";
+import "../../assets/css/previewimage.css";
+import { Select, MenuItem } from "@material-ui/core";
+import FetchApi from '../../api/FetchAPI';
 
 class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
 		this.state = {billMonth:'', billNO: '', billDate:'', billAmount:''};
-		this.state.table = {"columns":[{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"surname","type":"numeric"},{"title":"Bill No","field":"billNo","type":"numeric"},{"title":"Date","field":"Date","type":"date"},{"title":"Amount","field":"Amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}],"data":[{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"},{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"}]};
+		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"surname","type":"numeric"},{"title":"Bill No","field":"billNo","type":"numeric"},{"title":"Date","field":"Date","type":"date"},{"title":"Amount","field":"Amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
+		this.state.tableData = [{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"},{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"}];
+		this.state.monthData = this.generateBillMonth();
+
 		this._handleImageChange = this._handleImageChange.bind(this);
+		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 		this.textUpdate = this.textUpdate.bind(this);
 	}
 
-	_handleSubmit(e) {
-		e.preventDefault();
+	generateBillMonth(curMon){
+		let dt = new Date();
+		let month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+		let list = [];
+		let m = dt.getMonth();
+		let y = dt.getFullYear();
+		let currentMonth = month.splice(m);
+		let previousLoop = month.splice(0,m);
 
+		for(let i=0;i<currentMonth.length;i++){
+			list.push({"month":currentMonth[i], "year":y});
+		}
+
+		for(let i=0;i<previousLoop.length;i++){
+			list.push({"month":previousLoop[i], "year":y-1});
+		}
+
+		return {"curMonth": m, "monthList":list}
+	}
+
+	_handleSubmit(e) {
+
+		e.preventDefault();
 		let fetchurl = "http://10.165.7.169:3000/invoice/add" ;
 		let paramObj = { 
 			bill_no:this.state.billNO,
@@ -30,9 +55,18 @@ class Dashboard extends React.Component {
 			bill_image:this.state.imagePreviewUrl
 		};
 
-		fetchApi(fetchurl,JSON.stringify(paramObj)).then(data =>{
-				console.log(data);                            
+		fetch(fetchurl, {
+			method: 'POST',
+			headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json'//application/x-www-form-urlencoded
+			},
+			body: JSON.stringify(paramObj)
+		}).then(data =>{
+			console.log(data);
 		});
+		this.state.table.data.push({billNo: paramObj.bill_no, Date: paramObj.bill_date, Amount: paramObj.bill_amount});
+		this.setState({"table":this.state.table});
 		console.log('handle uploading-', this.state.file);
 	}
 
@@ -50,6 +84,15 @@ class Dashboard extends React.Component {
 		reader.readAsDataURL(file)
 	}
 
+	serachEmployeeDetails(e){
+		let _this = this;
+		let data = {};
+		new FetchApi().serachEmployeeDetails(data, function(data){
+			console.log(data);
+			_this.setState("tableData", data);
+		});
+	}
+
 	textUpdate(key, value){
 		let obj = {};
 		obj[key] = value;
@@ -59,18 +102,42 @@ class Dashboard extends React.Component {
 	render() {
 
 		let imagePreviewUrl = this.state.imagePreviewUrl;
-		let $imagePreview = null;
+		let imagePreview = null;
 		if (imagePreviewUrl) {
-			$imagePreview = (<div className="imgPreview"><img src={imagePreviewUrl} alt={"Select input"}/></div>);
+			imagePreview = (<div className="imgPreview"><img src={imagePreviewUrl} alt={"Select input"}/></div>);
 		}
 
 		// <UIFieldsGeneral mapList={uiMap1}/>
 		return (
 			<Grid container xs={12}>
-				<Grid container xs={12}>
-					<MaterialTableDemo columns={this.state.table.columns} data={this.state.table.data} editable={false}/>
+				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+					<Grid item>
+						<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
+					</Grid>
+					<Grid item>
+						<Select style={{"padding":"8px"}}
+							value={this.state.monthData.monthList[0].month+"-"+this.state.monthData.monthList[0].year}>
+							{
+								this.state.monthData.monthList.map((item, index) => {
+									return (
+										<MenuItem value={item.month+"-"+item.year} key={index}>
+											<em>{item.month+"-"+item.year}</em>
+										</MenuItem>
+									);
+								})
+							}
+						</Select>
+					</Grid>
+					<Grid item style={{"padding":"20px"}}>
+						<Button variant="contained" color="primary" onClick={(e)=>this.serachEmployeeDetails(e)} >
+							Search
+						</Button>
+					</Grid>
 				</Grid>
-				<Grid container xs={6} justify="center" className="UI_Form_Container" style={{"padding":"20px","marginLeft":"25%"}}>
+				<Grid item container xs={12}>
+					<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData} editable={false}/>
+				</Grid>
+				<Grid item container xs={6} justify="center" className="UI_Form_Container" style={{"padding":"20px","marginLeft":"25%"}}>
 					<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
 						<TextField label= {"Bill Month"} value={this.state.billMonth} onChange={(e) => {this.setState({"billMonth": e.currentTarget.value})}}/>
 					</Grid>
@@ -88,7 +155,7 @@ class Dashboard extends React.Component {
 						<input className="fileInput" type="file" onChange={(e)=>this._handleImageChange(e)} />
 					</Grid>
 					<Grid item xs={12} style={{"textAlign":"center"}}>
-						{$imagePreview}
+						{imagePreview}
 					</Grid>
 					<Grid item xs={12} style={{"textAlign":"center"}}>
 						<Button variant="contained" color="primary" onClick={(e)=>this._handleSubmit(e)} >
