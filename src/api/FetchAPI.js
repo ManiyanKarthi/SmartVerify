@@ -1,10 +1,18 @@
 
 function fetchData(url, method, body, callback) {
-    return fetch(url, {
-        method: method,
-        body: body,
-        headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}
-    }).then(callback);
+    if(method === "GET"){
+        return fetch(url, {
+            method: method,
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}
+        }).then(response => response.json()).then(callback);
+    }
+    else if(method === "POST"){
+        return fetch(url, {
+            method: method,
+            body: JSON.stringify(body),
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}
+        }).then(callback);
+    }
 }
 
 class FetchApi {
@@ -15,7 +23,7 @@ class FetchApi {
     }
 
     serachEmployeeDetails(data, callback){
-        fetchData(this.baseurl + "/invoice/getUserData", "POST", data, callback);
+        fetchData(this.baseurl + "/invoice/getinvoices", "GET", data, callback);
     }
 
     addNewBill(data, callback){

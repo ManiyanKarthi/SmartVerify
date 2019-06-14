@@ -17,17 +17,27 @@ class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billMonth:'', billNO: '', billDate:'', billAmount:''};
+		let dt = new Date();
+		var y = dt.getFullYear().toString();
+		var m = (dt.getMonth() + 1).toString();
+		var d = dt.getDate().toString();
+		(d.length === 1) && (d = '0' + d);
+		(m.length === 1) && (m = '0' + m);
+		var date_formatted = y + "-" + m + "-" + d;
+		this.state = {billType:'', billNO: '', billDate:'', billAmount:''};
 		this.state.dialogStatus = false;
-		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"surname","type":"numeric"},{"title":"Bill No","field":"billNo","type":"numeric"},{"title":"Date","field":"Date","type":"date"},{"title":"Amount","field":"Amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
-		this.state.tableData = [{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"},{"name":"Mehmet","surname":"Baran","billNo":1987,"Date":"26-09-1993","Amount":"","status":"Submitted"}];
+		this.state.employeeID = '';
+		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
+		this.state.billDate = date_formatted;
 		this.state.monthData = this.generateBillMonth();
+		this.state.billMonth = this.state.monthData.monthList[0].month+"-"+this.state.monthData.monthList[0].year;
 		this.addNewBill = this.addNewBill.bind(this);
 		this.handleImageChange = this.handleImageChange.bind(this);
 		this.openDialog = this.openDialog.bind(this);
 		this.closeDialog = this.closeDialog.bind(this);
+		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
-		this.textUpdate = this.textUpdate.bind(this);
+		this.getInvoices();
 	}
 
 	generateBillMonth(curMon){
@@ -49,12 +59,14 @@ class Dashboard extends React.Component {
 
 	addNewBill(e) {
 		let paramObj = { 
+			employee_no: this.state.employeeID,
+			bill_type: this.state.billType,
 			bill_no:this.state.billNO,
 			bill_date:this.state.billDate,
 			bill_amount:this.state.billAmount,
 			bill_image:this.state.imagePreviewUrl
 		};
-		new FetchApi().addNewBill(JSON.stringify(paramObj), function(data){
+		new FetchApi().addNewBill(paramObj, function(data){
 			console.log(data);
 		})
 	}
@@ -72,11 +84,16 @@ class Dashboard extends React.Component {
 	}
 
 	serachEmployeeDetails(e){
-		let _this = this;
 		let data = {};
-		new FetchApi().serachEmployeeDetails(data, function(data){
-			console.log(data);
-			_this.setState("tableData", data);
+		this.getInvoices(data);
+	}
+
+	getInvoices(param){
+		let _this = this;
+		new FetchApi().serachEmployeeDetails(param, function(res){
+			_this.setState({"tableData": res.invoices}, function () {
+				_this.forceUpdate();
+			});
 		});
 	}
 	
@@ -88,18 +105,16 @@ class Dashboard extends React.Component {
 
 	}
 
-	textUpdate(key, value){
-		let obj = {};
-		obj[key] = value;
-		this.setState(obj);
-	}
-  
 	openDialog(){
-		this.setState({"dialogStatus":true});
+		this.setState({"dialogStatus":true}, function(){
+			this.forceUpdate();
+		});
 	}
 
 	closeDialog(){
-		this.setState({"dialogStatus": false});
+		this.setState({"dialogStatus": false}, function(){
+			this.forceUpdate();
+		});
 	}
 
 	render() {
@@ -113,7 +128,7 @@ class Dashboard extends React.Component {
 					</Grid>
 					<Grid item>
 						<Select style={{"padding":"8px"}}
-							value={this.state.monthData.monthList[0].month+"-"+this.state.monthData.monthList[0].year}>
+							value={this.state.billMonth} onChange={(e)=> {this.setState({"billMonth":e.target.value})}}>
 							{
 								this.state.monthData.monthList.map((item, index) => {
 									return (
@@ -150,7 +165,7 @@ class Dashboard extends React.Component {
 									<TextField label= {"Bill No"} value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
 								</Grid>
 								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-									<TextField label= {"Bill Date"} value={this.state.billDate} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
+									<TextField label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 								</Grid>
 								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
 									<TextField label= {"Bill Amount"} value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
