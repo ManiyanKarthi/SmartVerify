@@ -9,35 +9,31 @@ import TextField from "@material-ui/core/TextField"
 import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
-import Fab from '@material-ui/core/Fab';
-import AddIcon from '@material-ui/icons/Add';
 import Dialog from '@material-ui/core/Dialog';
 
 class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
-		let dt = new Date();
-		var y = dt.getFullYear().toString();
-		var m = (dt.getMonth() + 1).toString();
-		var d = dt.getDate().toString();
-		(d.length === 1) && (d = '0' + d);
-		(m.length === 1) && (m = '0' + m);
-		var date_formatted = y + "-" + m + "-" + d;
-		this.state = {billType:'', billNO: '', billDate:'', billAmount:''};
+		this.state = {billNO: '', billDate:'', billAmount:''};
+		this.state.showSearchContainer = false;
+		this.state.showSuccessMessage = false;
+		this.state.showErrorMessage = false;
+		this.state.errorMessage = "";
 		this.state.dialogStatus = false;
 		this.state.employeeID = '';
 		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
-		this.state.billDate = date_formatted;
+		this.state.billTypeList = ["Fuel", "Toll", "Others"];
+		this.state.billType = 0;
+		this.state.billDate = this.getCurrentDate();
 		this.state.monthData = this.generateBillMonth();
-		this.state.billMonth = this.state.monthData.monthList[0].month+"-"+this.state.monthData.monthList[0].year;
+		this.state.billMonth = this.state.monthData.monthList[0].value;
 		this.addNewBill = this.addNewBill.bind(this);
 		this.handleImageChange = this.handleImageChange.bind(this);
 		this.openDialog = this.openDialog.bind(this);
 		this.closeDialog = this.closeDialog.bind(this);
 		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
-		this.getInvoices();
 	}
 
 	generateBillMonth(curMon){
@@ -46,20 +42,33 @@ class Dashboard extends React.Component {
 		let list = [];
 		let m = dt.getMonth();
 		let y = dt.getFullYear();
-		let currentMonth = month.splice(m);
-		let previousLoop = month.splice(0,m);
-		for(let i=0;i<currentMonth.length;i++){
-			list.push({"month":currentMonth[i], "year":y});
-		}
-		for(let i=0;i<previousLoop.length;i++){
-			list.push({"month":previousLoop[i], "year":y-1});
+		for(var i=0;i<month.length;i++){
+			var cur = (i + m) % 12;
+			var ye = (i + m ) > 12 ? (y - 1) : y;
+			var mo = (cur + 1).toString();
+			(mo.length === 1) && (mo = '0' + mo);
+			var obj = {"month":month[cur], value:mo+"-"+ye, "year":ye};
+			list.push(obj);
 		}
 		return {"curMonth": m, "monthList":list}
 	}
 
+	getCurrentDate(){
+		let dt = new Date();
+		var y = dt.getFullYear().toString();
+		var m = (dt.getMonth() + 1).toString();
+		var d = dt.getDate().toString();
+		(d.length === 1) && (d = '0' + d);
+		(m.length === 1) && (m = '0' + m);
+		var date_formatted = y + "-" + m + "-" + d;
+		return date_formatted;
+	}
+
 	addNewBill(e) {
+		let _this = this;
 		let paramObj = { 
 			employee_no: this.state.employeeID,
+			bill_month: this.state.billMonth,
 			bill_type: this.state.billType,
 			bill_no:this.state.billNO,
 			bill_date:this.state.billDate,
@@ -68,6 +77,20 @@ class Dashboard extends React.Component {
 		};
 		new FetchApi().addNewBill(paramObj, function(data){
 			console.log(data);
+			if(data.message == "success"){
+				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:''});
+				_this.serachEmployeeDetails();
+			}
+			else {
+				var msg = "";
+				var errors = data.errors;
+				if(errors && errors.length > 0){
+					for(var i=0;i<errors.length;i++){
+						msg = msg + "" + errors[i].msg + "(" + errors[i].param + ")" + (i >= errors.length - 1 ? "" : ",") + " ";
+					}
+				}
+				_this.setState({showSuccessMessage: false, showErrorMessage: true, errorMessage: msg});
+			}
 		})
 	}
 
@@ -83,22 +106,23 @@ class Dashboard extends React.Component {
 		reader.readAsDataURL(file)
 	}
 
-	serachEmployeeDetails(e){
-		let data = {};
+	serachEmployeeDetails(){
+		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth, from: 0, limit: 10};
 		this.getInvoices(data);
 	}
 
 	getInvoices(param){
 		let _this = this;
 		new FetchApi().serachEmployeeDetails(param, function(res){
-			_this.setState({"tableData": res.invoices}, function () {
+			_this.setState({"tableData": res.invoices, "showSearchContainer": true}, function () {
 				_this.forceUpdate();
 			});
 		});
 	}
 	
 	clearForm(e){
-
+		document.getElementsByClassName("fileInput")[0].value = "";
+		this.setState({"showSuccessMessage":false, "showErrorMessage":false, "errorMessage":'', "billDate":this.getCurrentDate(), "billType": 0, "billNO":'', "billAmount":'', "imagePreviewUrl":null});
 	}
 	
 	smartVerify(e){
@@ -132,7 +156,7 @@ class Dashboard extends React.Component {
 							{
 								this.state.monthData.monthList.map((item, index) => {
 									return (
-										<MenuItem value={item.month+"-"+item.year} key={index}>
+										<MenuItem value={item.value} key={index}>
 											<em>{item.month+"-"+item.year}</em>
 										</MenuItem>
 									);
@@ -141,54 +165,86 @@ class Dashboard extends React.Component {
 						</Select>
 					</Grid>
 					<Grid item style={{"padding":"20px"}}>
-						<Button variant="contained" color="primary" onClick={(e)=>this.serachEmployeeDetails(e)} >
+						<Button variant="contained" color="primary" onClick={this.serachEmployeeDetails} >
 							Search
 						</Button>
 					</Grid>
 				</Grid>
-				<Grid item container xs={12}>
-					<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData}/>
-				</Grid>
-				<Grid item xs={12}>
-					<div style={{"position":"fixed","right":"30px", "bottom":"30px"}}>
-						<Fab color="primary" aria-label="Add">
-							<AddIcon onClick={this.openDialog}/>
-						</Fab>
-					</div>
-					<div>
-						<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
-							<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
-								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-									<TextField label= {"Bill Type"} value={this.state.billType} onChange={(e) => {this.setState({"billType": e.currentTarget.value})}}/>
-								</Grid>
-								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-									<TextField label= {"Bill No"} value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
-								</Grid>
-								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-									<TextField label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
-								</Grid>
-								<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-									<TextField label= {"Bill Amount"} value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
-								</Grid>
-								<Grid item xs={12} style={{"textAlign":"center"}}>
-									<label>Bill Image </label>
-									<input className="fileInput" type="file" onChange={(e)=>this.handleImageChange(e)} />
-								</Grid>
-								<Grid item xs={12} style={{"textAlign":"center"}}>
-									<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
-										Add New Bill
-									</Button>&nbsp;&nbsp;
-									<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} >
-										Smart Verify
-									</Button>&nbsp;&nbsp;
-									<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
-										Clear
-									</Button>
-								</Grid>
-							</Grid>
-						</Dialog>
-					</div>
-				</Grid>
+				{
+					this.state.showSearchContainer ? 
+					<Grid item xs={12} >
+						<Grid item container xs={12}>
+							<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData}/>
+						</Grid>
+						<Grid item container xs={12} justify="center" style={{"padding":"15px"}}>
+							<Button variant="contained" color="primary"  onClick={this.openDialog} >
+								Add new bill
+							</Button>
+						</Grid>
+						<Grid item xs={12}>
+							<div>
+								<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
+									<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
+										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+											<label style={{"marginLeft":"-30px"}}>Bill Type:</label>&nbsp;&nbsp;&nbsp;
+											<Select style={{"padding":"8px"}}
+												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
+												{
+													this.state.billTypeList.map((item, index) => {
+														return (
+															<MenuItem value={index} key={index}>
+																<em>{item}</em>
+															</MenuItem>
+														);
+													})
+												}
+											</Select>
+										</Grid>
+										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+											<TextField label= {"Bill No"} type="number" value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
+										</Grid>
+										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+											<TextField label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
+										</Grid>
+										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+											<TextField label= {"Bill Amount"} type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
+										</Grid>
+										<Grid item xs={12} style={{"textAlign":"center"}}>
+											<label>Bill Image </label>
+											<input className="fileInput" type="file" onChange={(e)=>this.handleImageChange(e)} />
+										</Grid>
+										<Grid item xs={12} style={{"textAlign":"center"}}>
+											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
+												Add New Bill
+											</Button>&nbsp;&nbsp;
+											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} >
+												Smart Verify
+											</Button>&nbsp;&nbsp;
+											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
+												Clear
+											</Button>
+										</Grid>
+										<Grid item xs={12}>
+											<div style={{"textAlign":"center", "padding":"10px 5px 0px 5px"}}>
+											{
+												this.state.showSuccessMessage ? <span style={{"color":"green", "fontFamily":"monospace"}}>Bill added successfully</span>
+												: (this.state.showErrorMessage ? 
+													<span style={{"color":"red", "fontFamily":"monospace"}}>
+														{
+															this.state.errorMessage
+														}
+													</span>
+												: null)
+											}
+											</div>
+										</Grid>
+									</Grid>
+								</Dialog>
+							</div>
+						</Grid>
+					</Grid>
+					: null 
+				}
 			</Grid>
 		);
 	}

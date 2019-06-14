@@ -1,6 +1,17 @@
 
 function fetchData(url, method, body, callback) {
     if(method === "GET"){
+        if(body != undefined && body != null){
+            let keys = Object.keys(body);
+            if(keys.length > 0){
+                url = url + "?";
+                let dt = [];
+                for(var i=0;i<keys.length;i++){
+                    dt.push(keys[i]+"="+body[keys[i]]);
+                }
+                url = url + dt.join("&");
+            }
+        }
         return fetch(url, {
             method: method,
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}
@@ -11,7 +22,7 @@ function fetchData(url, method, body, callback) {
             method: method,
             body: JSON.stringify(body),
             headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}
-        }).then(callback);
+        }).then(response => response.json()).then(callback);
     }
 }
 

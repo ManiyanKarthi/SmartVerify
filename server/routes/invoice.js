@@ -82,7 +82,7 @@ router.post('/add', [
 	 var bill_date_convert = new Date(req.body.bill_date);
 	 InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:parseInt(req.body.bill_type),bill_no:req.body.bill_no,bill_amount:req.body.bill_amount,bill_date:bill_date_convert,image_name:act_image_name,created_at:new Date(),verify_status:0};
 	 InvoiceModel.InsertInvoice(InvoiceData);
-	 res.json({ status:200,message:'Added successfully'});
+	 res.json({ status:200,message:'success'});
   }  
   //verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
 });
@@ -93,6 +93,16 @@ router.get('/getinvoices', async (req, res, next) => {
 		let limit = req.query.limit;
 		var filter_query = {emp_id:emp_id,from:from,limit:limit};
 		let invoice_list = await InvoiceModel.GetInvoices(filter_query);
+		invoice_list.forEach(function(part, index, theArray) {
+			if(theArray.bill_type==1){
+				theArray[index].bill_type = 'Fuel';
+			}else if(theArray.bill_type==2){
+				theArray[index].bill_type = 'Toll';
+			}else{
+				theArray[index].bill_type = 'Other';
+			}
+		  //console.log(theArray);
+		});
 		console.log('invoice_list ----',invoice_list);
 		if(invoice_list.length){
 			res.json({ status:200,invoices:invoice_list});
