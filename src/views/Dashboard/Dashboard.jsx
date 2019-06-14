@@ -42,9 +42,9 @@ class Dashboard extends React.Component {
 		let list = [];
 		let m = dt.getMonth();
 		let y = dt.getFullYear();
-		for(var i=0;i<month.length;i++){
-			var cur = (i + m) % 12;
-			var ye = (i + m ) > 12 ? (y - 1) : y;
+		for(var i=month.length - 1;i>=0;i--){
+			var cur = (i + m + 1) % 12;
+			var ye = (i + m ) < 12 ? (y - 1) : y;
 			var mo = (cur + 1).toString();
 			(mo.length === 1) && (mo = '0' + mo);
 			var obj = {"month":month[cur], value:mo+"-"+ye, "year":ye};
