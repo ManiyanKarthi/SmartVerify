@@ -94,9 +94,9 @@ router.get('/getinvoices', async (req, res, next) => {
 		var filter_query = {emp_id:emp_id,from:from,limit:limit};
 		let invoice_list = await InvoiceModel.GetInvoices(filter_query);
 		invoice_list.forEach(function(part, index, theArray) {
-			if(theArray.bill_type==1){
+			if(part.bill_type==1){
 				theArray[index].bill_type = 'Fuel';
-			}else if(theArray.bill_type==2){
+			}else if(part.bill_type==2){
 				theArray[index].bill_type = 'Toll';
 			}else{
 				theArray[index].bill_type = 'Other';

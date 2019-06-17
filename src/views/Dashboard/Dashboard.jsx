@@ -23,7 +23,7 @@ class Dashboard extends React.Component {
 		this.state.dialogStatus = false;
 		this.state.employeeID = '';
 		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
-		this.state.billTypeList = ["Fuel", "Toll", "Others"];
+		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.billType = 0;
 		this.state.billDate = this.getCurrentDate();
 		this.state.monthData = this.generateBillMonth();
@@ -76,7 +76,6 @@ class Dashboard extends React.Component {
 			bill_image:this.state.imagePreviewUrl
 		};
 		new FetchApi().addNewBill(paramObj, function(data){
-			console.log(data);
 			if(data.message == "success"){
 				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:''});
 				_this.serachEmployeeDetails();
@@ -186,7 +185,7 @@ class Dashboard extends React.Component {
 								<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
 									<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
 										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<label style={{"marginLeft":"-30px"}}>Bill Type:</label>&nbsp;&nbsp;&nbsp;
+											<label style={{"marginLeft":"-10px"}}>Bill Type:</label>&nbsp;&nbsp;&nbsp;
 											<Select style={{"padding":"8px"}}
 												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
 												{
