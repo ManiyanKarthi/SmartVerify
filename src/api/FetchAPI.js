@@ -1,7 +1,7 @@
 
 function fetchData(url, method, body, callback) {
     if(method === "GET"){
-        if(body != undefined && body != null){
+        if(body){
             let keys = Object.keys(body);
             if(keys.length > 0){
                 url = url + "?";

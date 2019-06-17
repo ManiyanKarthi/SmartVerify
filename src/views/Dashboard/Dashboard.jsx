@@ -15,14 +15,8 @@ class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: '', billDate:'', billAmount:''};
-		this.state.showSearchContainer = false;
-		this.state.showSuccessMessage = false;
-		this.state.showErrorMessage = false;
-		this.state.errorMessage = "";
-		this.state.successMessage = "";
-		this.state.dialogStatus = false;
-		this.state.employeeID = '';
+		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", 
+					showSearchContainer: false, showSuccessMessage: false, showErrorMessage: false, dialogStatus:false};
 		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.billType = 0;
@@ -77,7 +71,7 @@ class Dashboard extends React.Component {
 			bill_image:this.state.imagePreviewUrl
 		};
 		new FetchApi().addNewBill(paramObj, function(data){
-			if(data.message == "success"){
+			if(data.message === "success"){
 				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
 				_this.serachEmployeeDetails();
 			}
@@ -131,9 +125,9 @@ class Dashboard extends React.Component {
 		let paramObj = { 
 			bill_image:this.state.imagePreviewUrl
 		};
-		
+
 		new FetchApi().smartVerifyBill(paramObj, function(data){
-			if(data.message == "success"){
+			if(data.message === "success"){
 				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
 			}
 		});
@@ -153,7 +147,6 @@ class Dashboard extends React.Component {
 
 	render() {
 
-		// <UIFieldsGeneral mapList={uiMap1}/>
 		return (
 			<Grid container>
 				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
