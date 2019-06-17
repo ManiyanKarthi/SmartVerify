@@ -20,6 +20,7 @@ class Dashboard extends React.Component {
 		this.state.showSuccessMessage = false;
 		this.state.showErrorMessage = false;
 		this.state.errorMessage = "";
+		this.state.successMessage = "";
 		this.state.dialogStatus = false;
 		this.state.employeeID = '';
 		this.state.tableColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
@@ -77,7 +78,7 @@ class Dashboard extends React.Component {
 		};
 		new FetchApi().addNewBill(paramObj, function(data){
 			if(data.message == "success"){
-				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:''});
+				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
 				_this.serachEmployeeDetails();
 			}
 			else {
@@ -88,7 +89,7 @@ class Dashboard extends React.Component {
 						msg = msg + "" + errors[i].msg + "(" + errors[i].param + ")" + (i >= errors.length - 1 ? "" : ",") + " ";
 					}
 				}
-				_this.setState({showSuccessMessage: false, showErrorMessage: true, errorMessage: msg});
+				_this.setState({showSuccessMessage: false, showErrorMessage: true, errorMessage: msg, successMessage: ''});
 			}
 		})
 	}
@@ -126,6 +127,16 @@ class Dashboard extends React.Component {
 	
 	smartVerify(e){
 
+		let _this = this;
+		let paramObj = { 
+			bill_image:this.state.imagePreviewUrl
+		};
+		
+		new FetchApi().smartVerifyBill(paramObj, function(data){
+			if(data.message == "success"){
+				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+			}
+		});
 	}
 
 	openDialog(){
@@ -226,7 +237,7 @@ class Dashboard extends React.Component {
 										<Grid item xs={12}>
 											<div style={{"textAlign":"center", "padding":"10px 5px 0px 5px"}}>
 											{
-												this.state.showSuccessMessage ? <span style={{"color":"green", "fontFamily":"monospace"}}>Bill added successfully</span>
+												this.state.showSuccessMessage ? <span style={{"color":"green", "fontFamily":"monospace"}}>{this.state.successMessage}</span>
 												: (this.state.showErrorMessage ? 
 													<span style={{"color":"red", "fontFamily":"monospace"}}>
 														{

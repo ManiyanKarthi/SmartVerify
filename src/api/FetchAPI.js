@@ -41,6 +41,10 @@ class FetchApi {
         fetchData(this.baseurl + "/invoice/add", "POST", data, callback);
     }
 
+    smartVerifyBill(data, callback){
+        fetchData(this.baseurl + "/invoice/smartVerify", "POST", data, callback);
+    }
+
 }
 
 export default FetchApi;
