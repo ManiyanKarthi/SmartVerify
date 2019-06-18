@@ -123,6 +123,7 @@ class Dashboard extends React.Component {
 
 		let _this = this;
 		let paramObj = { 
+			employee_no: this.state.employeeID,
 			bill_image:this.state.imagePreviewUrl
 		};
 

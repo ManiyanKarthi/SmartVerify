@@ -42,7 +42,11 @@ class FetchApi {
     }
 
     smartVerifyBill(data, callback){
-        fetchData(this.baseurl + "/invoice/smartVerify", "POST", data, callback);
+        fetchData(this.baseurl + "/invoice/smart-verify", "POST", data, callback);
+    }
+
+    getEmployeeForVerification(data, callback){
+        fetchData(this.baseurl + "/invoice/getinvoices", "GET", data, callback);
     }
 
 }

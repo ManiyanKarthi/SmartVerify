@@ -9,14 +9,14 @@ import UserProfile from "views/UserProfile/UserProfile.jsx";
 
 const dashboardRoutes = [
   {
-    path: "/dashboard",
+    path: "/billsubmission",
     name: "Employee Bill Submission",
     icon: Person,
     component: DashboardPage,
     layout: "/admin"
   },
   {
-    path: "/user",
+    path: "/billverification",
     name: "Finance Bill Verification",
     icon: Person,
     component: UserProfile,
