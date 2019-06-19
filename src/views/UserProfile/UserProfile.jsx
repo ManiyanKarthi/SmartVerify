@@ -33,6 +33,9 @@ class UserProfile extends React.Component {
 		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 		this.zoomImage = this.zoomImage.bind(this);
+		this.smartVerify = this.smartVerify.bind(this);
+		this.manualVerify = this.manualVerify.bind(this);
+		this.rejectForm = this.rejectForm.bind(this);
 
 		this.getInvoices();
 	}
@@ -91,12 +94,35 @@ class UserProfile extends React.Component {
 		});
 	}
 	
-	clearForm(e){
-		document.getElementsByClassName("fileInput")[0].value = "";
-		this.setState({"showSuccessMessage":false, "showErrorMessage":false, "errorMessage":'', "billDate":this.getCurrentDate(), "billType": 0, "billNO":'', "billAmount":'', "imagePreviewUrl":null});
+	smartVerify(e){
+
+		let _this = this;
+		let paramObj = { 
+			bill_image:this.state.imagePreviewUrl
+		};
+
+		new FetchApi().smartVerifyBill(paramObj, function(data){
+			if(data.message === "Success"){
+				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+			}
+		});
 	}
 	
-	smartVerify(e){
+	manualVerify(e){
+
+		let _this = this;
+		let paramObj = { 
+			bill_image:this.state.imagePreviewUrl
+		};
+
+		new FetchApi().smartVerifyBill(paramObj, function(data){
+			if(data.message === "Success"){
+				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+			}
+		});
+	}
+	
+	rejectForm(e){
 
 		let _this = this;
 		let paramObj = { 
@@ -137,12 +163,11 @@ class UserProfile extends React.Component {
 
 	onDetailedRowClick(event, data){
 		console.log(event, data);
-		this.setState({"enableDetails":true, "billData":{billType:'Fuel', billDate:'17-06-2019', billAmount:'50', billStatus:'Submitted', 
+		this.setState({"enableDetails":true, "billData":{billType: data.bill_type, billDate: data.bill_date, billAmount: data.bill_amount, billStatus: 'Submitted', 
 					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox4x4jx01m6pn.jpg'}});
 	}
 
 	zoomImage(){
-		console.log("Image clicked");
 		let _this = this;
 		this.setState({"zoomImageFlag":true}, function () {
 			_this.forceUpdate();
@@ -278,10 +303,10 @@ class UserProfile extends React.Component {
 											<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} >
 												Smart Verify
 											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} >
+											<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} >
 												Manual Verify
 											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
+											<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} >
 												Reject
 											</Button>
 										</Grid>
