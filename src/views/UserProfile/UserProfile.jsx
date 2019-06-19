@@ -261,7 +261,7 @@ class UserProfile extends React.Component {
 													<Grid item xs={6}>
 														<label className="popupLabelValue">{this.state.billData.billStatus}</label>
 													</Grid>
-												</Grid>
+												</Grid> 
 												<Grid container item xs={12}>
 													<Grid item xs={6}>
 														<label className="popupLabelText">AutoML Prediction:</label>
