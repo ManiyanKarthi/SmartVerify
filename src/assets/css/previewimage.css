@@ -20,4 +20,13 @@
     width: 100%;
     margin-top: 20px;
 }
-  
+
+.popupLabelText{
+    padding: 5px;
+    font-size: 20px;
+}
+
+.popupLabelValue{
+    padding: 5px;
+    font-size: 18px;
+}
