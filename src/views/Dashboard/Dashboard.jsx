@@ -128,8 +128,13 @@ class Dashboard extends React.Component {
 		};
 
 		new FetchApi().smartVerifyBill(paramObj, function(data){
-			if(data.message === "success"){
-				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+			if(data.status === 200){
+				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart verified'};
+				updateObj.billDate = data.prediction_data.date;
+				updateObj.billAmount = data.prediction_data.billed_amount;
+				updateObj.billNO = data.prediction_data.bill_number;
+				updateObj.bill_type = data.prediction_data.bill_type;
+				_this.setState(updateObj);
 			}
 		});
 	}
