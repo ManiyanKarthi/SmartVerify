@@ -133,8 +133,11 @@ class Dashboard extends React.Component {
 				updateObj.billDate = data.prediction_data.date;
 				updateObj.billAmount = data.prediction_data.billed_amount;
 				updateObj.billNO = data.prediction_data.bill_number;
-				updateObj.bill_type = data.prediction_data.bill_type;
+				updateObj.billMonth = data.prediction_data.bill_type;
 				_this.setState(updateObj);
+			}
+			else{
+				let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed', successMessage: ''};
 			}
 		});
 	}
