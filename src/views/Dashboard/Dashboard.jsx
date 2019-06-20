@@ -63,6 +63,7 @@ class Dashboard extends React.Component {
 	addNewBill() {
 		let _this = this;
 		let paramObj = { 
+			invoice_id: this.state.invoice_id,
 			employee_no: this.state.employeeID,
 			bill_month: this.state.billMonth,
 			bill_type: this.state.billType,
@@ -142,7 +143,8 @@ class Dashboard extends React.Component {
 				updateObj.billDate = data.prediction_data.date;
 				updateObj.billAmount = data.prediction_data.billed_amount;
 				updateObj.billNO = data.prediction_data.bill_number;
-				updateObj.billMonth = data.prediction_data.bill_type;
+				updateObj.billType = data.prediction_data.bill_type;
+				updateObj.invoice_id = data.prediction_data.invoice_id;
 				_this.setState(updateObj);
 			}
 			else{
@@ -179,7 +181,7 @@ class Dashboard extends React.Component {
 		return (
 			<Grid container>
 				<Grid  item container xs={12}>
-					<Grid item container xs={9} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+					<Grid item container xs={7} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
 						<Grid item>
 							<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
 						</Grid>
@@ -203,7 +205,7 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item xs={3} style={{"padding":"20px", "textAlign":"right", "display": (this.state.showSearchContainer ? "" : "none") }}>
+					<Grid item xs={5} style={{"padding":"20px", "textAlign":"right", "display": (this.state.showSearchContainer ? "" : "none") }}>
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} >
 							Add new bill
 						</Button>&nbsp;&nbsp;
