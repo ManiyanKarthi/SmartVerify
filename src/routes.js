@@ -1,11 +1,8 @@
 // @material-ui/icons
 import Person from "@material-ui/icons/Person";
 
-
 import DashboardPage from "views/Dashboard/Dashboard.jsx";
 import UserProfile from "views/UserProfile/UserProfile.jsx";
-
-
 
 const dashboardRoutes = [
   {

@@ -32,7 +32,7 @@ class Dashboard extends React.Component {
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 	}
 
-	generateBillMonth(curMon){
+	generateBillMonth(){
 		let dt = new Date();
 		let month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 		let list = [];
@@ -60,7 +60,7 @@ class Dashboard extends React.Component {
 		return date_formatted;
 	}
 
-	addNewBill(e) {
+	addNewBill() {
 		let _this = this;
 		let paramObj = { 
 			employee_no: this.state.employeeID,
@@ -128,7 +128,7 @@ class Dashboard extends React.Component {
 		this.setState({"showSuccessMessage":false, "showErrorMessage":false, "errorMessage":'', "billDate":this.getCurrentDate(), "billType": 0, "billNO":'', "billAmount":'', "imagePreviewUrl":null});
 	}
 	
-	smartVerify(e){
+	smartVerify(){
 
 		let _this = this;
 		let paramObj = { 
@@ -204,10 +204,10 @@ class Dashboard extends React.Component {
 						</Grid>
 					</Grid>
 					<Grid item xs={3} style={{"padding":"20px", "textAlign":"right", "display": (this.state.showSearchContainer ? "" : "none") }}>
-						<Button variant="contained" color="primary"  onClick={(e) => {this.openDialog("NewBill")}} >
+						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} >
 							Add new bill
 						</Button>&nbsp;&nbsp;
-						<Button variant="contained" color="default"  onClick={(e) => {this.openDialog("SmartVerify")}} >
+						<Button variant="contained" color="default"  onClick={() => {this.openDialog("SmartVerify")}} >
 							Smart Verify
 						</Button>
 					</Grid>

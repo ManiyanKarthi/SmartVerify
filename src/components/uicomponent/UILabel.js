@@ -1,15 +1,9 @@
-import React from 'react';
-
+import React from "react";
 
 class UILabel extends React.Component {
-    render() {
-
-        return (<label>
-            {this.props.value}
-           </label>
-        )
-    }
-
+  render() {
+    return <label>{this.props.value}</label>;
+  }
 }
 
-export default UILabel; 
+export default UILabel;
