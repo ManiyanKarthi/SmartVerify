@@ -80,7 +80,7 @@ class UserProfile extends React.Component {
 	}
 
 	serachEmployeeDetails(){
-		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth, from: 0, limit: 10};
+		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth};
 		this.getInvoices(data);
 	}
 
