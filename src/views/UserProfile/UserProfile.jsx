@@ -9,14 +9,13 @@ import TextField from "@material-ui/core/TextField"
 import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
-import Dialog from '@material-ui/core/Dialog';
 
 class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
 		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, zoomImageFlag: false,
-					showSearchContainer: false, showSuccessMessage: false, showErrorMessage: false, dialogStatus:false};
+					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true};
 		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.tableDetailedColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.billData = {billType:'', billDate:'', billAmount:'', billStatus:'', automlPrediction:'', manualPrediction:'', billImage:''};
@@ -28,8 +27,8 @@ class UserProfile extends React.Component {
 		this.onRowClick = this.onRowClick.bind(this);
 		this.onDetailedRowClick = this.onDetailedRowClick.bind(this);
 		this.handleImageChange = this.handleImageChange.bind(this);
-		this.openDialog = this.openDialog.bind(this);
-		this.closeDialog = this.closeDialog.bind(this);
+		this.showNextPage = this.showNextPage.bind(this);
+		this.showHomePage = this.showHomePage.bind(this);
 		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 		this.zoomImage = this.zoomImage.bind(this);
@@ -136,14 +135,14 @@ class UserProfile extends React.Component {
 		});
 	}
 
-	openDialog(){
-		this.setState({"dialogStatus":true}, function(){
+	showNextPage(){
+		this.setState({"homePageShowFlag": false}, function(){
 			this.forceUpdate();
 		});
 	}
 
-	closeDialog(){
-		this.setState({"dialogStatus": false}, function(){
+	showHomePage(){
+		this.setState({"homePageShowFlag": true}, function(){
 			this.forceUpdate();
 		});
 	}
@@ -151,7 +150,7 @@ class UserProfile extends React.Component {
 	onRowClick(event, data){
 		// console.log(event, data);
 		let _this = this;
-		this.setState({"dialogStatus":true, "enableDetails":false, "zoomImageFlag":false}, function(){
+		this.setState({"homePageShowFlag": false}, function(){
 			let paramObj = {emp_id: data.employeeID, bill_month: data.billMonth, from: 0, limit: 10};
 			new FetchApi().serachEmployeeDetails(paramObj, function(res){
 				_this.setState({"tableDetailedData": res.invoices, "showSearchContainer": true}, function () {
@@ -164,7 +163,7 @@ class UserProfile extends React.Component {
 	onDetailedRowClick(event, data){
 		console.log(event, data);
 		this.setState({"enableDetails":true, "billData":{billType: data.bill_type, billDate: data.bill_date, billAmount: data.bill_amount, billStatus: 'Submitted', 
-					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox4x4jx01m6pn.jpg'}});
+					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox2pwjx4bj8l1.jpg'}});
 	}
 
 	zoomImage(){
@@ -178,34 +177,32 @@ class UserProfile extends React.Component {
 
 		return (
 			<Grid container>
-				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
-					<Grid item>
-						<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
-					</Grid>
-					<Grid item>
-						<Select style={{"padding":"8px"}}
-							value={this.state.billMonth} onChange={(e)=> {this.setState({"billMonth":e.target.value})}}>
-							{
-								this.state.monthData.monthList.map((item, index) => {
-									return (
-										<MenuItem value={item.value} key={index}>
-											<em>{item.month+"-"+item.year}</em>
-										</MenuItem>
-									);
-								})
-							}
-						</Select>
-					</Grid>
-					<Grid item style={{"padding":"20px"}}>
-						<Button variant="contained" color="primary" onClick={this.serachEmployeeDetails} >
-							Search
-						</Button>
-					</Grid>
-				</Grid>
 				{
-					this.state.showSearchContainer ? 
-					<Grid item xs={12} >
-						<Grid item container xs={12}>
+					this.state.homePageShowFlag ? 
+					<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+						<Grid item>
+							<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
+						</Grid>
+						<Grid item>
+							<Select style={{"padding":"8px"}}
+								value={this.state.billMonth} onChange={(e)=> {this.setState({"billMonth":e.target.value})}}>
+								{
+									this.state.monthData.monthList.map((item, index) => {
+										return (
+											<MenuItem value={item.value} key={index}>
+												<em>{item.month+"-"+item.year}</em>
+											</MenuItem>
+										);
+									})
+								}
+							</Select>
+						</Grid>
+						<Grid item style={{"padding":"20px"}}>
+							<Button variant="contained" color="primary" onClick={this.serachEmployeeDetails} >
+								Search
+							</Button>
+						</Grid>
+						<Grid item xs={12}>
 							<div style={{"paddingTop":"20px","width":"100%"}} >
 								<MaterialTable
 								title=""
@@ -214,109 +211,85 @@ class UserProfile extends React.Component {
 								onRowClick={this.onRowClick} />
 							</div>
 						</Grid>
-						<Grid item xs={12}>
-							<Dialog onClose={this.closeDialog} maxWidth={"xl"}
-								aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
-								<Grid container style={{"padding":"20px"}}>
-									<Grid item xs={12} style={{padding:"15px"}}>
-										<MaterialTable title="" search = {false}
-											columns={this.state.tableDetailedColumns}
-											data={this.state.tableDetailedData}
-											onRowClick={this.onDetailedRowClick} />
+					</Grid>
+					:
+					<Grid item container xs={12}>
+						<Grid container style={{"padding":"20px"}}>
+							<Grid item xs={6} style={{padding:"15px"}}>
+								<MaterialTable title="" search = {false}
+									columns={this.state.tableDetailedColumns}
+									data={this.state.tableDetailedData}
+									onRowClick={this.onDetailedRowClick} />
+							</Grid>
+							<Grid container item xs={2} style={{padding:"15px", "textAlign":"left"}}>
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">Bill Type:</label>
+									</Grid>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.billType}</label>
 									</Grid>
 								</Grid>
-								{
-									this.state.enableDetails ? 
-									<Grid container justify="center" style={{"padding":"20px", "maxWidth":"1000px"}}>
-										<Grid container item xs={12}>
-											<Grid container item xs={6} style={{padding:"15px", "textAlign":"left"}}>
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">Bill Type:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.billType}</label>
-													</Grid>
-												</Grid>
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">Date:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.billDate}</label>
-													</Grid>
-												</Grid>
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">Amount:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.billAmount}</label>
-													</Grid>
-												</Grid>
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">Status:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.billStatus}</label>
-													</Grid>
-												</Grid> 
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">AutoML Prediction:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.automlPrediction}</label>
-													</Grid>
-												</Grid>
-												<Grid container item xs={12}>
-													<Grid item xs={6}>
-														<label className="popupLabelText">Vision Text Prediction:</label>
-													</Grid>
-													<Grid item xs={6}>
-														<label className="popupLabelValue">{this.state.billData.manualPrediction}</label>
-													</Grid>
-												</Grid>
-											</Grid>
-											<Grid item xs={6} style={{padding:"15px", "textAlign":"center"}}>
-												<Grid item xs={12}>
-													<img style={{"maxWidth":"250px", "cursor":"pointer"}} src={this.state.billData.billImage}
-														onClick={this.zoomImage}/>
-												</Grid>
-												{
-													this.state.zoomImageFlag ? 
-													<div style={{"position":"fixed", "zIndex":1301, "top":0, "bottom":0, "left":0, "right":0, "backgroundColor":"grey"}}>
-														<div style={{"textAlign":"right", "backgroundColor":"#3a3a3a"}}>
-															<button style={{"backgroundColor":"transparent", "color":"white", "border":"0px", "fontSize":"20px", "padding":"15px 30px", "cursor":"pointer"}}
-																onClick={(e) => {this.setState({"zoomImageFlag":false})}}>X</button>
-														</div>
-														<div style = {{"padding":"5px 3%", "overflow":"auto", "height":"calc(100% - 60px)"}}>
-															<img style = {{"maxWidth":"100%"}} src={this.state.billData.billImage}/>
-														</div>
-													</div>
-													: null
-												}
-											</Grid>
-										</Grid>
-										<Grid item xs={12} style={{"textAlign":"center"}}>
-											<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} >
-												Smart Verify
-											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} >
-												Manual Verify
-											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} >
-												Reject
-											</Button>
-										</Grid>
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">Date:</label>
 									</Grid>
-									: null
-								}
-							</Dialog>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.billDate}</label>
+									</Grid>
+								</Grid>
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">Amount:</label>
+									</Grid>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.billAmount}</label>
+									</Grid>
+								</Grid>
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">Status:</label>
+									</Grid>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.billStatus}</label>
+									</Grid>
+								</Grid> 
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">AutoML Prediction:</label>
+									</Grid>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.automlPrediction}</label>
+									</Grid>
+								</Grid>
+								<Grid container item xs={12}>
+									<Grid item xs={8}>
+										<label className="popupLabelText">Vision Text Prediction:</label>
+									</Grid>
+									<Grid item xs={4}>
+										<label className="popupLabelValue">{this.state.billData.manualPrediction}</label>
+									</Grid>
+								</Grid>
+							</Grid>
+							<Grid item xs={4} style={{padding:"15px", "textAlign":"center"}}>
+								<Grid item xs={12}>
+									<img style={{"maxWidth":"100%", "cursor":"pointer"}} src={this.state.billData.billImage}
+										onClick={this.zoomImage} alt="Bill"/>
+								</Grid>
+							</Grid>
 						</Grid>
-					</Grid>
-					: null 
+						<Grid item xs={12} style={{"textAlign":"center"}}>
+							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} >
+								Smart Verify
+							</Button>&nbsp;&nbsp;
+							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} >
+								Manual Verify
+							</Button>&nbsp;&nbsp;
+							<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} >
+								Reject
+							</Button>
+						</Grid>
+					</Grid>	
 				}
 			</Grid>
 		);
