@@ -410,3 +410,28 @@ exports.getTransformData = (bill_type,bill_area)=> {
 		}
 	})
 };
+
+//verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	
+exports.BillStatus = (bill_status)=> {	
+		var status_res;
+		switch (bill_status) {
+		  case 0:
+			status_res = "Submitted";
+			break;
+		  case 1:
+			status_res = "Auto verified";
+			break;
+		  case 2:
+			status_res = "Auto verify failed";
+			break;
+		  case 3:
+			status_res = "Manual verified";
+			break;
+		  case 4:
+			status_res = "Rejected";
+			break;
+		  default:
+			status_res="No status";
+		}
+		return status_res;	
+}

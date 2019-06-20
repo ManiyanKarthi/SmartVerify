@@ -90,7 +90,7 @@ exports.GetInvoices = (filter_query,getCount)=> {
 		if(getCount==0){
 					db.get().collection('invoice').aggregate([
 						 { $match: match_cond },
-						 { $project: { _id:0,invoice_id: "$_id",bill_no:'$bill_no',bill_amount:'$bill_amount',bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} },created_month:{ $dateToString: { format: "%m-%Y", date: "$created_at",timezone: 'Asia/Kolkata'} },bill_type:'$bill_type'
+						 { $project: { _id:0,invoice_id: "$_id",bill_no:'$bill_no',bill_amount:'$bill_amount',bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} },created_month:{ $dateToString: { format: "%m-%Y", date: "$created_at",timezone: 'Asia/Kolkata'} },bill_type:'$bill_type',verify_status:'$verify_status'
 									   //bill_category:{ $cond: { if: { $gt: [ "$bill_type", 1 ] }, then: 'Fuel bill', else: 'Toll bill' } } 
 									 } },
 						 { $sort: { invoice_id: -1 } }
@@ -160,6 +160,44 @@ exports.getInvoiceMonthWise = (filter_query) => {
 				  smart_verified_failed:{$sum:'$smart_verified_failed'},
 				  manual_verified:{$sum:'$manual_verified'},
 				  rejected:{$sum:'$rejected'}
+			}}
+		]).toArray(function(err, invoice_result) 	{							
+				if(err){
+					console.log(err,'err---'); //reject(err);
+					resolve([]);
+				}else{
+					//console.log(res,'res---->');
+					resolve(invoice_result);
+				}
+		});
+	});
+}
+
+exports.getEmployeeInvoice = (filter_query) => {
+	
+	var match_cond = { bill_date:{$exists: true}};
+	if(filter_query.emp_id && filter_query.emp_id > 0){
+		match_cond['employee_no'] = parseInt(filter_query.emp_id);
+	}	
+	if(filter_query.month_year){		
+		var month_year_arr = filter_query.month_year.split(/[./-]+/);
+		var month_year_frm = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-01`);
+		var month_year_to = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-31`);
+		console.log(month_year_to,'month_year',month_year_frm);
+		match_cond['bill_date'] = {$gte:month_year_frm,$lte:month_year_to};		
+	}
+	//console.log(match_cond,'match_cond');
+	
+	return new Promise( (resolve, reject) => {
+		db.get().collection('invoice').aggregate([
+			{$match	: match_cond },
+			{$project : {
+				employee_no:"$employee_no",				
+				bill_amount:"$bill_amount",
+				verify_status:"$verify_status",
+				month : {$month : "$bill_date"}, 
+				year : {$year :  "$bill_date"},
+				bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} }				             
 			}}
 		]).toArray(function(err, invoice_result) 	{							
 				if(err){

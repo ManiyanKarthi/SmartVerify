@@ -33,23 +33,6 @@ router.get('/', (req, res, next) => {
   res.send('respond with a resource');
 });
 
-/* GET users listing. */
-router.post('/add1', (req, res, next) => {
-	//let DB = req.db;
-	req.checkBody('name', 'Name is required').notEmpty();
-    req.checkBody('bandwidth', 'Bandwidth is required').notEmpty();
-
-   var errors = req.validationErrors();
-   if(errors){
-	   console.log(errors,'errors--->');
-	   
-    res.status(422).json({ errors: errors.array() });
-   }else{
-	   console.log('errors no----');
-   }
-  res.send('respond with a resource');
-});
-
 router.post('/add', [
   check('employee_no').isLength({ min: 3,max:10}),  
   check('bill_no').isLength({ min: 3,max:20 }),  
@@ -65,16 +48,8 @@ router.post('/add', [
      res.json({ status:422,errors: errors.array() });
   }else{
 	  //console.log(req.body);
-	    var base64Data = req.body.bill_image;
-		/*base64Data = base64Data.replace(/^data:image\/png;base64,/, "");
-		require("fs").writeFile("./public/images/out.jpg", base64Data, 'base64', function(err) {
-		  console.log(err);
-		});*/
-		let image_name = uniqid();
-		
-		/*base64Img.img(base64Data, './public/images/', image_name, function(err, filepath) {
-			console.log(filepath,'filepath');
-		});*/
+	    var base64Data = req.body.bill_image;		
+		let image_name = uniqid();		
 		var filepath = base64Img.imgSync(base64Data,storeage_path,image_name);
 		let image_ext = filepath.split('.').pop();
 		var act_image_name = image_name+'.'+image_ext;
@@ -117,7 +92,8 @@ router.get('/getinvoices', async (req, res, next) => {
 			}
 			let month_num_arr = theArray[index].bill_date.split('-');
 			let bill_mon = getMonthName(month_num_arr[1]);
-			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;
+			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;			
+			theArray[index].bill_status = CommonModel.BillStatus(theArray[index].verify_status);			
 		});
 		//console.log('invoice_list ----',invoice_list);
 		if(invoice_list.length){
@@ -129,21 +105,37 @@ router.get('/getinvoices', async (req, res, next) => {
 
 router.get('/get-monthwise-invoices', async (req, res, next) => {
 			
-			let emp_id = req.query.emp_id;			
-			let month_year = req.query.month_year;
-			var filter_query = {emp_id:emp_id,month_year:month_year};
-			
-		   let invoice_list = await InvoiceModel.getInvoiceMonthWise(filter_query);
-		   
-			invoice_list.forEach(function(part, index, theArray) {
-				//console.log(theArray[index].bill_type,'theArray.bill_type');
-				let bill_month = theArray[index]._id.month;
-				let bill_year = theArray[index]._id.year;			
-				let bill_mon = getMonthName(bill_month);
-				theArray[index].bill_month = ` ${bill_mon} - ${bill_year}`;
-			});
+		let emp_id = req.query.emp_id;			
+		let month_year = req.query.month_year;
+		var filter_query = {emp_id:emp_id,month_year:month_year};		
+		let invoice_list = await InvoiceModel.getInvoiceMonthWise(filter_query);
+	   
+		invoice_list.forEach(function(part, index, theArray) {
+			//console.log(theArray[index].bill_type,'theArray.bill_type');
+			let bill_month = theArray[index]._id.month;
+			let bill_year = theArray[index]._id.year;			
+			let bill_mon = getMonthName(bill_month);
+			theArray[index].bill_month = ` ${bill_mon} - ${bill_year}`;
+		});
 		
-		   res.json({ status:202,invoice_list:invoice_list});
+		res.json({ status:202,invoice_list:invoice_list});
+});
+
+router.get('/list-employee-invoices', async (req, res, next) => {
+			
+		let emp_id = req.query.emp_id;			
+		let month_year = req.query.month_year;
+		var filter_query = {emp_id:emp_id,month_year:month_year};
+		let invoice_list = await InvoiceModel.getEmployeeInvoice(filter_query);		
+	   
+		invoice_list.forEach(function(part, index, theArray) {
+			//console.log(theArray[index].bill_type,'theArray.bill_type');
+			let month_num_arr = theArray[index].bill_date.split('-');	
+			let bill_mon = getMonthName(month_num_arr[1]);
+			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;
+		});
+		
+		res.json({ status:202,invoice_list:invoice_list});
 });
 
 function getMonthName(month_num){
@@ -247,7 +239,8 @@ function UnixTimeToDate(timelist){
 	if (mm < 10) {
 	  mm = '0' + mm;
 	} 
-	var exact_date = dd + '-' + mm + '-' + yyyy;
+	//var exact_date = dd + '-' + mm + '-' + yyyy;
+	var exact_date = yyyy+'-'+mm+'-'+dd ;
 	return exact_date;	
 }   
 
