@@ -6,7 +6,7 @@ exports.BillType = (bill_response)=> {
 		var response = bill_response;
 		//console.log(bill_response,'bill_response',response,'response');
 		var bill_type=0;
-		if(response.payload[0].displayName && response.payload[0].classification.score){		
+		if(response.payload.length > 0 && response.payload[0].displayName && response.payload[0].classification.score){		
 		  if(response.payload[0].classification.score>0.8){			  
 			  if(response.payload[0].displayName=='FuelBill'){
 				  bill_type = 1;

@@ -82,7 +82,16 @@ router.post('/add', [
 	  
 		 var bill_date_convert = new Date(req.body.bill_date);
 		 InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:parseInt(req.body.bill_type),bill_no:req.body.bill_no,bill_amount:req.body.bill_amount,bill_date:bill_date_convert,image_name:act_image_name,created_at:new Date(),verify_status:0};
-		 InvoiceModel.InsertInvoice(InvoiceData);
+		 
+		 let invoice_id = req.body.invoice_id;
+		 if(invoice_id && invoice_id.length>14){
+			 InvoiceData.updated_at = new Date();
+			 delete InvoiceData['created_at'];
+			 InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);			 
+		 }else{
+			 InvoiceModel.InsertInvoice(InvoiceData);
+		 }
+		 
 		 res.json({ status:200,message:'Success'});
   }  
   //verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
@@ -95,7 +104,7 @@ router.get('/getinvoices', async (req, res, next) => {
 		let month_year = req.query.month_year;
 		var filter_query = {emp_id:emp_id,from:from,limit:limit,month_year:month_year};
 		let invoice_list = await InvoiceModel.GetInvoices(filter_query,0);
-		let invoice_total = await InvoiceModel.GetInvoices(filter_query,1);
+		//let invoice_total = await InvoiceModel.GetInvoices(filter_query,1);
 		
 		invoice_list.forEach(function(part, index, theArray) {
 			//console.log(theArray[index].bill_type,'theArray.bill_type');
@@ -106,16 +115,35 @@ router.get('/getinvoices', async (req, res, next) => {
 			}else{
 				theArray[index].bill_type = 'Other';
 			}
-			let month_num_arr = theArray[index].created_month.split('-');
-			let bill_mon = getMonthName(month_num_arr[0]);
-			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[1]}`;
+			let month_num_arr = theArray[index].bill_date.split('-');
+			let bill_mon = getMonthName(month_num_arr[1]);
+			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;
 		});
 		//console.log('invoice_list ----',invoice_list);
 		if(invoice_list.length){
-			res.json({ status:200,invoice_total:invoice_total,invoices:invoice_list});
+			res.json({ status:200,invoices:invoice_list});
 		}else{
-			res.json({ status:202,message:'No data found'});
+			res.json({ status:202,invoices:[],message:'No data found'});
 		}	   
+});
+
+router.get('/get-monthwise-invoices', async (req, res, next) => {
+			
+			let emp_id = req.query.emp_id;			
+			let month_year = req.query.month_year;
+			var filter_query = {emp_id:emp_id,month_year:month_year};
+			
+		   let invoice_list = await InvoiceModel.getInvoiceMonthWise(filter_query);
+		   
+			invoice_list.forEach(function(part, index, theArray) {
+				//console.log(theArray[index].bill_type,'theArray.bill_type');
+				let bill_month = theArray[index]._id.month;
+				let bill_year = theArray[index]._id.year;			
+				let bill_mon = getMonthName(bill_month);
+				theArray[index].bill_month = ` ${bill_mon} - ${bill_year}`;
+			});
+		
+		   res.json({ status:202,invoice_list:invoice_list});
 });
 
 function getMonthName(month_num){
@@ -153,7 +181,7 @@ router.post('/smart-verify',[
 	  });
 	  console.log(`Prediction results:`);
 	  //var bill_type =1;
-	  console.log('---',response.payload[0].displayName,'displayName',response.payload[0].classification.score);	  
+	  console.log(response);	  
 	  var bill_type = await CommonModel.BillType(response);  		
 	/*
 	  response.payload.forEach(result => {
