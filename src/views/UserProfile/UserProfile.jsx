@@ -150,18 +150,17 @@ class UserProfile extends React.Component {
 	}
 
 	onRowClick(event, data){
-		// console.log(event, data);
 		let _this = this;
-		this.setState({"homePageShowFlag": false}, function(){
-			let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
-			new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
-				_this.setState({"tableDetailedData": res.invoice_list, "showSearchContainer": true}, function () {
+		let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
+		new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
+			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, 
+				"tableDetailedData": res.invoice_list, "showSearchContainer": true}, 
+				function () {
 					if(_this.state.tableDetailedData && _this.state.tableDetailedData.length > 0){
 						_this.onDetailedRowClick({}, _this.state.tableDetailedData[0]);
 					}
 				});
-			}});
-		});
+		}});
 	}
 
 	onDetailedRowClick(event, data){
@@ -224,70 +223,81 @@ class UserProfile extends React.Component {
 					</Grid>
 					:
 					<Grid item container xs={12}>
-						<Grid style={{"textAlign":"center"}}>
-							<Fab aria-label="Add" onClick={()=>{this.setState({"homePageShowFlag":true})}} >
-								<BackIcon />
-							</Fab>
+						<Grid container style={{"textAlign":"center"}} direction={"row"}>
+							<Grid item> 
+								<Fab aria-label="Add" onClick={()=>{this.setState({"homePageShowFlag":true})}} >
+									<BackIcon />
+								</Fab>
+							</Grid>
+							<Grid item style={{"padding":"18px 30px", "fontSize":"20px"}}>
+								<span style={{"fontWeight":"bold"}}>Employee ID: </span><span>{this.state.clickedEmployeeID}</span>
+							</Grid>
 						</Grid>
-						<Grid container style={{"padding":"20px"}}>
-							<Grid item xs={4} style={{padding:"15px"}}>
-								<MaterialTable title="" search = {false}
-									columns={this.state.tableDetailedColumns}
-									data={this.state.tableDetailedData}
-									onRowClick={this.onDetailedRowClick} />
-							</Grid>
-							<Grid container item xs={4} style={{padding:"15px", "textAlign":"left", "maxHeight":"500px"}}>
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">Bill Type:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.billType}</label>
-									</Grid>
-								</Grid>
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">Date:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.billDate}</label>
-									</Grid>
-								</Grid>
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">Amount:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.billAmount}</label>
-									</Grid>
-								</Grid>
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">Status:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.billStatus}</label>
-									</Grid>
-								</Grid> 
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">AutoML Prediction:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.automlPrediction}</label>
-									</Grid>
-								</Grid>
-								<Grid container item xs={12}>
-									<Grid item xs={8}>
-										<label className="popupLabelText">Vision Text Prediction:</label>
-									</Grid>
-									<Grid item xs={4}>
-										<label className="popupLabelValue">{this.state.billData.manualPrediction}</label>
-									</Grid>
+						<Grid container spacing={2} style={{"padding":"20px"}}>
+							<Grid item xs={4}>
+								<Grid item xs={12} className={"gridSpaceContainer"}>
+									<MaterialTable title="" search = {false}
+										columns={this.state.tableDetailedColumns}
+										data={this.state.tableDetailedData}
+										onRowClick={this.onDetailedRowClick} />
 								</Grid>
 							</Grid>
-							<Grid item xs={4} style={{padding:"15px", "textAlign":"center"}}>
-								<img style={{"maxWidth":"100%", "maxHeight":"500px"}} src={this.state.billData.billImage} alt="Bill"/>
+							<Grid container item xs={4}>
+								<Grid item xs={12} className={"gridSpaceContainer"}>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Bill Type:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.billType}</label>
+										</Grid>
+									</Grid>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Date:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.billDate}</label>
+										</Grid>
+									</Grid>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Amount:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.billAmount}</label>
+										</Grid>
+									</Grid>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Status:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.billStatus}</label>
+										</Grid>
+									</Grid> 
+									<Grid container className={"gridSpaceForm"} style={{"marginTop":"15px"}}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">AutoML Prediction:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.automlPrediction}</label>
+										</Grid>
+									</Grid>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Vision Text Prediction:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<label className="popupLabelValue">{this.state.billData.manualPrediction}</label>
+										</Grid>
+									</Grid>
+								</Grid>
+							</Grid>
+							<Grid item xs={4}>
+								<Grid item xs={12} className={"gridSpaceContainer"} style={{"textAlign":"center"}}>
+									<img style={{"maxWidth":"100%", "maxHeight":"400px"}} src={this.state.billData.billImage} alt="Bill"/>
+								</Grid>
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center"}}>

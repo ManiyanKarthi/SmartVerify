@@ -23,10 +23,21 @@
 
 .popupLabelText{
     padding: 5px;
-    font-size: 20px;
+    font-size: 20px;    
 }
 
 .popupLabelValue{
     padding: 5px;
     font-size: 18px;
+}
+
+.gridSpaceContainer{
+    background-color:#e8e8e880;
+    height: 100%;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.gridSpaceForm{
+    padding: 10px 15px;
 }
