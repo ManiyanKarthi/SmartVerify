@@ -20,6 +20,7 @@ const modelId = 'ICN5128000347661266160';
 const filePath = './public/images/sample_petrol_bill.jpg';
 const scoreThreshold = '0.6';
 const storeage_path = './server/public/images/invoice';
+const storeage_url = 'images/invoice/';
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
@@ -92,7 +93,7 @@ router.get('/getinvoices', async (req, res, next) => {
 			}
 			let month_num_arr = theArray[index].bill_date.split('-');
 			let bill_mon = getMonthName(month_num_arr[1]);
-			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;			
+			theArray[index].bill_month = `${bill_mon} - ${month_num_arr[2]}`;			
 			theArray[index].bill_status = CommonModel.BillStatus(theArray[index].verify_status);			
 		});
 		//console.log('invoice_list ----',invoice_list);
@@ -115,7 +116,8 @@ router.get('/get-monthwise-invoices', async (req, res, next) => {
 			let bill_month = theArray[index]._id.month;
 			let bill_year = theArray[index]._id.year;			
 			let bill_mon = getMonthName(bill_month);
-			theArray[index].bill_month = ` ${bill_mon} - ${bill_year}`;
+			theArray[index].bill_month = `${bill_mon} - ${bill_year}`;
+			theArray[index].bill_status = CommonModel.BillStatus(theArray[index].verify_status);
 		});
 		
 		res.json({ status:202,invoice_list:invoice_list});
@@ -132,7 +134,8 @@ router.get('/list-employee-invoices', async (req, res, next) => {
 			//console.log(theArray[index].bill_type,'theArray.bill_type');
 			let month_num_arr = theArray[index].bill_date.split('-');	
 			let bill_mon = getMonthName(month_num_arr[1]);
-			theArray[index].bill_month = ` ${bill_mon} - ${month_num_arr[2]}`;
+			theArray[index].bill_month = `${bill_mon} - ${month_num_arr[2]}`;
+			theArray[index].bill_status = CommonModel.BillStatus(theArray[index].verify_status);
 		});
 		
 		res.json({ status:202,invoice_list:invoice_list});
@@ -149,10 +152,11 @@ router.get('/get-invoice-details/:id', async (req, res, next) => {
 				let invoice_image_loc = (invoice_list[0].image_name && invoice_list[0].image_name!='') ? storeage_path+'/'+invoice_list[0].image_name:'';
 				console.log(invoice_image_loc,'invoice_image_loc');
 				if (invoice_image_loc && fs.existsSync(invoice_image_loc)) {
-					invoice_list[0].invoice_image_loc = invoice_image_loc;
+					invoice_list[0].invoice_image_loc = storeage_url+invoice_list[0].image_name;
 				}else{
 					invoice_list[0].invoice_image_loc = '';
 				}
+				invoice_list[0].bill_status = CommonModel.BillStatus(invoice_list[0].verify_status);
 				res.json({ status:200,invoice_list:invoice_list});
 			}else{
 				res.json({ status:203,invoice_list:invoice_list});

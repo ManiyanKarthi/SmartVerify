@@ -132,7 +132,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				}
 			}
 			
-			var net_sales=0;
+			var net_sales='0';
 			if(fuel_amount > fuel_sales){			
 				net_sales = fuel_amount;
 			}else if(fuel_sales>0){
@@ -355,7 +355,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			
 			console.log(fee_amount,'fee_amount >');	
 			
-			var net_sales=0;
+			var net_sales='0';
 			if(fee_amount > 0){
 				net_sales=fee_amount;
 			}else if(toll_amount > 0){

@@ -194,6 +194,7 @@ exports.getEmployeeInvoice = (filter_query) => {
 			{$project : {
 				employee_no:"$employee_no",				
 				bill_amount:"$bill_amount",
+				bill_no:"$bill_no",
 				verify_status:"$verify_status",
 				//month : {$month : "$bill_date"}, 
 				//year : {$year :  "$bill_date"},
