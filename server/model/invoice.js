@@ -84,7 +84,7 @@ exports.GetInvoices = (filter_query,getCount)=> {
 		match_cond['bill_date'] = {$gte:month_year_frm,$lte:month_year_to};		
 	}
 	
-	console.log(match_cond,'match_cond');
+	//console.log(match_cond,'match_cond');
 	
 	return new Promise( (resolve, reject) => {
 		if(getCount==0){
@@ -133,7 +133,7 @@ exports.getInvoiceMonthWise = (filter_query) => {
 		var month_year_arr = filter_query.month_year.split(/[./-]+/);
 		var month_year_frm = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-01`);
 		var month_year_to = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-31`);
-		console.log(month_year_to,'month_year',month_year_frm);
+		//console.log(month_year_to,'month_year',month_year_frm);
 		match_cond['bill_date'] = {$gte:month_year_frm,$lte:month_year_to};		
 	}
 	//console.log(match_cond,'match_cond');
@@ -183,7 +183,7 @@ exports.getEmployeeInvoice = (filter_query) => {
 		var month_year_arr = filter_query.month_year.split(/[./-]+/);
 		var month_year_frm = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-01`);
 		var month_year_to = new Date(`${month_year_arr[1]}-${month_year_arr[0]}-31`);
-		console.log(month_year_to,'month_year',month_year_frm);
+		//console.log(month_year_to,'month_year',month_year_frm);
 		match_cond['bill_date'] = {$gte:month_year_frm,$lte:month_year_to};		
 	}
 	//console.log(match_cond,'match_cond');
@@ -195,8 +195,36 @@ exports.getEmployeeInvoice = (filter_query) => {
 				employee_no:"$employee_no",				
 				bill_amount:"$bill_amount",
 				verify_status:"$verify_status",
-				month : {$month : "$bill_date"}, 
-				year : {$year :  "$bill_date"},
+				//month : {$month : "$bill_date"}, 
+				//year : {$year :  "$bill_date"},
+				bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} }				             
+			}}
+		]).toArray(function(err, invoice_result) 	{							
+				if(err){
+					console.log(err,'err---'); //reject(err);
+					resolve([]);
+				}else{
+					//console.log(res,'res---->');
+					resolve(invoice_result);
+				}
+		});
+	});
+	
+}
+
+exports.getEmployeeInvoiceDetails = (invoice_id) => {
+	
+	var match_cond = { _id:ObjectID(invoice_id) };
+	
+	//console.log(match_cond,'match_cond');	
+	return new Promise( (resolve, reject) => {
+		db.get().collection('invoice').aggregate([
+			{$match	: match_cond },
+			{$project : {
+				employee_no:"$employee_no",				
+				bill_amount:"$bill_amount",
+				verify_status:"$verify_status",
+				image_name:"$image_name",
 				bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} }				             
 			}}
 		]).toArray(function(err, invoice_result) 	{							

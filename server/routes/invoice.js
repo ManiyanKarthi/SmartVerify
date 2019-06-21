@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const automl = require('@google-cloud/automl');
-//const automl = require('@google-cloud/automl').v1beta1;
 const vision = require('@google-cloud/vision');
 const fs = require('fs');
 var InvoiceModel = require('../model/invoice.js');
@@ -12,13 +11,15 @@ var Tesseract = require('tesseract.js')
 const { check, validationResult } = require('express-validator/check');
 var base64Img = require('base64-img');
 var uniqid = require('uniqid');
+var path = require('path');
+var appDir = require('app-root-path');
 
 const projectId = 'montgomery-242210';
 const computeRegion = 'us-central1';
 const modelId = 'ICN5128000347661266160';
 const filePath = './public/images/sample_petrol_bill.jpg';
 const scoreThreshold = '0.6';
-const storeage_path = './public/images/invoice';
+const storeage_path = './server/public/images/invoice';
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
@@ -37,7 +38,7 @@ router.post('/add', [
   check('employee_no').isLength({ min: 3,max:10}),  
   check('bill_no').isLength({ min: 3,max:20 }),  
   check('bill_date').isLength({ min: 4,max:30 }),
-  check('bill_amount').isLength({ min: 1,max:10 }),
+  check('bill_amount').toInt().isLength({ min: 1,max:10 }),
   check('bill_image').isLength({ min:10}),
   check('bill_type').isLength({ min:1})
 ], (req, res) => {	
@@ -53,7 +54,7 @@ router.post('/add', [
 		var filepath = base64Img.imgSync(base64Data,storeage_path,image_name);
 		let image_ext = filepath.split('.').pop();
 		var act_image_name = image_name+'.'+image_ext;
-		console.log(filepath,'filepath',image_ext)
+		console.log(filepath,'filepath',image_ext);
 	  
 		 var bill_date_convert = new Date(req.body.bill_date);
 		 InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:parseInt(req.body.bill_type),bill_no:req.body.bill_no,bill_amount:req.body.bill_amount,bill_date:bill_date_convert,image_name:act_image_name,created_at:new Date(),verify_status:0};
@@ -65,8 +66,7 @@ router.post('/add', [
 			 InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);			 
 		 }else{
 			 InvoiceModel.InsertInvoice(InvoiceData);
-		 }
-		 
+		 }		 
 		 res.json({ status:200,message:'Success'});
   }  
   //verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
@@ -136,6 +136,30 @@ router.get('/list-employee-invoices', async (req, res, next) => {
 		});
 		
 		res.json({ status:202,invoice_list:invoice_list});
+});
+
+router.get('/get-invoice-details/:id', async (req, res, next) => {
+			
+		let invoice_id = req.params.id;
+		var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+		if(checkForHexRegExp.test(invoice_id)){
+			let invoice_list = await InvoiceModel.getEmployeeInvoiceDetails(invoice_id);
+			//console.log(invoice_list[0].image_name,'invoice_list--image_name');			
+			if(invoice_list.length > 0){				
+				let invoice_image_loc = (invoice_list[0].image_name && invoice_list[0].image_name!='') ? storeage_path+'/'+invoice_list[0].image_name:'';
+				console.log(invoice_image_loc,'invoice_image_loc');
+				if (invoice_image_loc && fs.existsSync(invoice_image_loc)) {
+					invoice_list[0].invoice_image_loc = invoice_image_loc;
+				}else{
+					invoice_list[0].invoice_image_loc = '';
+				}
+				res.json({ status:200,invoice_list:invoice_list});
+			}else{
+				res.json({ status:203,invoice_list:invoice_list});
+			}
+		}else{
+			res.json({ status:402,message:"Invalid invoice id"});
+		}		
 });
 
 function getMonthName(month_num){
@@ -248,22 +272,16 @@ router.get('/verify-invoice', async (req, res, next) => {
 	
 	  const client = new automl.PredictionServiceClient();
 	  const modelFullId = client.modelPath(projectId, computeRegion, modelId);
- 
-	  // Read the file content for prediction.
 	  const content = fs.readFileSync(filePath, 'base64');
 	  
-	  //console.log(content); return false;
-	 
-	  const params = {};
-	 
+	  //console.log(content); return false;	 
+	  const params = {};	 
 	  if (scoreThreshold) {
 		params.score_threshold = scoreThreshold;
-	  }
-	 
+	  }	 
 	  // Set the payload by giving the content and type of the file.
 	  const payload = {};
-	  payload.image = {imageBytes: content};
-	 
+	  payload.image = {imageBytes: content};	 
 	  // params is additional domain-specific parameters.
 	  // currently there is no additional parameters supported.
 	  const [response] = await client.predict({
