@@ -10,12 +10,14 @@ import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Dialog from '@material-ui/core/Dialog';
+import {ToastsContainer, ToastsStore} from 'react-toasts';
+import LoaderImg from '../../assets/img/Loader.svg'
 
 class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", 
+		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", showLoaderImage: false,
 					showSearchContainer: false, showSuccessMessage: false, showErrorMessage: false, dialogStatus:false};
 		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
@@ -31,7 +33,7 @@ class Dashboard extends React.Component {
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
 	}
 
-	generateBillMonth(curMon){
+	generateBillMonth(){
 		let dt = new Date();
 		let month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 		let list = [];
@@ -59,9 +61,10 @@ class Dashboard extends React.Component {
 		return date_formatted;
 	}
 
-	addNewBill(e) {
+	addNewBill() {
 		let _this = this;
 		let paramObj = { 
+			invoice_id: this.state.invoice_id,
 			employee_no: this.state.employeeID,
 			bill_month: this.state.billMonth,
 			bill_type: this.state.billType,
@@ -70,10 +73,14 @@ class Dashboard extends React.Component {
 			bill_amount:this.state.billAmount,
 			bill_image:this.state.imagePreviewUrl
 		};
-		new FetchApi().addNewBill(paramObj, function(data){
+		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
+		new FetchApi().addNewBill({body: paramObj, success: function(data){
 			if(data.message === "Success"){
 				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+				_this.clearForm();
+				_this.closeDialog();
 				_this.serachEmployeeDetails();
+				ToastsStore.success("Bill added successfully");
 			}
 			else {
 				var msg = "";
@@ -85,64 +92,91 @@ class Dashboard extends React.Component {
 				}
 				_this.setState({showSuccessMessage: false, showErrorMessage: true, errorMessage: msg, successMessage: ''});
 			}
-		})
+			_this.setState({"showLoaderImage":false});
+		}, error: function(){
+			_this.setState({"showLoaderImage":false, showSuccessMessage: false, showErrorMessage: true, errorMessage: "Error", successMessage: ''});
+		}});
 	}
 
 	handleImageChange(e) {
+		let _this = this;
 		let reader = new FileReader();
 		let file = e.target.files[0];
 		reader.onloadend = () => {
 			this.setState({
 				file: file,
 				imagePreviewUrl: reader.result
+			}, function(){
+				_this.smartVerify();
 			});
 		}
-		reader.readAsDataURL(file)
+		reader.readAsDataURL(file);
 	}
 
 	serachEmployeeDetails(){
-		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth, from: 0, limit: 10};
-		this.getInvoices(data);
+		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth};
+		if(this.state.employeeID){
+			this.getInvoices(data);
+		}
+		else {
+			alert("Enter employee id");
+		}
 	}
 
 	getInvoices(param){
 		let _this = this;
-		new FetchApi().serachEmployeeDetails(param, function(res){
+		new FetchApi().serachEmployeeDetails({body: param, success: function(res){
 			_this.setState({"tableData": res.invoices, "showSearchContainer": true}, function () {
 				_this.forceUpdate();
 			});
-		});
+		}});
 	}
 	
-	clearForm(e){
+	clearForm(){
 		document.getElementsByClassName("fileInput")[0].value = "";
 		this.setState({"showSuccessMessage":false, "showErrorMessage":false, "errorMessage":'', "billDate":this.getCurrentDate(), "billType": 0, "billNO":'', "billAmount":'', "imagePreviewUrl":null});
 	}
 	
-	smartVerify(e){
+	smartVerify(){
 
 		let _this = this;
 		let paramObj = { 
 			employee_no: this.state.employeeID,
 			bill_image:this.state.imagePreviewUrl
 		};
-
-		new FetchApi().smartVerifyBill(paramObj, function(data){
+		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
+		new FetchApi().smartVerifyBill({body: paramObj, success: function(data){
+			_this.setState({"showLoaderImage": false});
 			if(data.status === 200){
 				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart verified'};
 				updateObj.billDate = data.prediction_data.date;
 				updateObj.billAmount = data.prediction_data.billed_amount;
 				updateObj.billNO = data.prediction_data.bill_number;
-				updateObj.bill_type = data.prediction_data.bill_type;
+				updateObj.billType = data.prediction_data.bill_type;
+				updateObj.invoice_id = data.prediction_data.invoice_id;
 				_this.setState(updateObj);
 			}
-		});
+			else{
+				let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed', successMessage: ''};
+				_this.setState(updateObj);
+			}
+		}, timeout: 30000, onTimeout: function(){
+			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed due to timeout', successMessage: ''};
+			_this.setState(updateObj);
+		}});
 	}
 
-	openDialog(){
-		this.setState({"dialogStatus":true}, function(){
-			this.forceUpdate();
-		});
+	openDialog(option){
+		if(option === "NewBill"){
+			this.setState({"dialogStatus":true, "NewSmartVerify": false}, function(){
+				this.forceUpdate();
+			});
+		}
+		else if(option === "SmartVerify"){
+			this.setState({"dialogStatus":true, "NewSmartVerify": true}, function(){
+				this.forceUpdate();
+			});
+		}
 	}
 
 	closeDialog(){
@@ -155,27 +189,39 @@ class Dashboard extends React.Component {
 
 		return (
 			<Grid container>
-				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
-					<Grid item>
-						<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
+				<Grid  item container xs={12}>
+					<Grid item container xs={7} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+						<Grid item>
+							<TextField label= {"Employee ID"} value={this.state.employeeID} 
+								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
+								onKeyPress={(e) => { if(e.key === "Enter") { this.serachEmployeeDetails(); } }}/>
+						</Grid>
+						<Grid item>
+							<Select style={{"padding":"8px"}}
+								value={this.state.billMonth} onChange={(e)=> {this.setState({"billMonth":e.target.value})}}>
+								{
+									this.state.monthData.monthList.map((item, index) => {
+										return (
+											<MenuItem value={item.value} key={index}>
+												<em>{item.month+"-"+item.year}</em>
+											</MenuItem>
+										);
+									})
+								}
+							</Select>
+						</Grid>
+						<Grid item style={{"padding":"20px"}}>
+							<Button variant="contained" color="primary" onClick={this.serachEmployeeDetails} >
+								Search
+							</Button>
+						</Grid>
 					</Grid>
-					<Grid item>
-						<Select style={{"padding":"8px"}}
-							value={this.state.billMonth} onChange={(e)=> {this.setState({"billMonth":e.target.value})}}>
-							{
-								this.state.monthData.monthList.map((item, index) => {
-									return (
-										<MenuItem value={item.value} key={index}>
-											<em>{item.month+"-"+item.year}</em>
-										</MenuItem>
-									);
-								})
-							}
-						</Select>
-					</Grid>
-					<Grid item style={{"padding":"20px"}}>
-						<Button variant="contained" color="primary" onClick={this.serachEmployeeDetails} >
-							Search
+					<Grid item xs={5} style={{"padding":"20px", "textAlign":"right", "display": (this.state.showSearchContainer ? "" : "none") }}>
+						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} >
+							Add new bill
+						</Button>&nbsp;&nbsp;
+						<Button variant="contained" color="default"  onClick={() => {this.openDialog("SmartVerify")}} >
+							Smart Verify
 						</Button>
 					</Grid>
 				</Grid>
@@ -185,18 +231,16 @@ class Dashboard extends React.Component {
 						<Grid item container xs={12}>
 							<MaterialTableDemo columns={this.state.tableColumns} data={this.state.tableData}/>
 						</Grid>
-						<Grid item container xs={12} justify="center" style={{"padding":"15px"}}>
-							<Button variant="contained" color="primary"  onClick={this.openDialog} >
-								Add new bill
-							</Button>
-						</Grid>
 						<Grid item xs={12}>
 							<div>
 								<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
+									<div style={{"position":"absolute", "top":"0px", "right":"0px", "padding":"5px 10px", "cursor":"pointer"}} onClick={this.closeDialog}>
+										<span>X</span>
+									</div>
 									<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
 										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
 											<label style={{"marginLeft":"-10px"}}>Bill Type:</label>&nbsp;&nbsp;&nbsp;
-											<Select style={{"padding":"8px"}}
+											<Select disabled={this.state.NewSmartVerify} style={{"padding":"8px"}}
 												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
 												{
 													this.state.billTypeList.map((item, index) => {
@@ -210,13 +254,13 @@ class Dashboard extends React.Component {
 											</Select>
 										</Grid>
 										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<TextField label= {"Bill No"} type="number" value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
+											<TextField disabled={this.state.NewSmartVerify} label= {"Bill No"} type="number" value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
 										</Grid>
 										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<TextField label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
+											<TextField disabled={this.state.NewSmartVerify} label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 										</Grid>
 										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<TextField label= {"Bill Amount"} type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
+											<TextField disabled={this.state.NewSmartVerify} label= {"Bill Amount"} type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center"}}>
 											<label>Bill Image </label>
@@ -224,13 +268,18 @@ class Dashboard extends React.Component {
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center"}}>
 											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
-												Add New Bill
+												Add
 											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} >
+											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} style={{"display": "none"}}>
 												Smart Verify
 											</Button>&nbsp;&nbsp;
 											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
 												Clear
+											</Button>
+										</Grid>
+										<Grid item xs={12} style={{"textAlign":"center", "paddingTop":"10px"}}>
+											<Button style={{"display":(this.state.showLoaderImage ? "" : "none")}}>
+												<img src={LoaderImg} style={{"width":"25px"}}/>
 											</Button>
 										</Grid>
 										<Grid item xs={12}>
@@ -254,6 +303,7 @@ class Dashboard extends React.Component {
 					</Grid>
 					: null 
 				}
+				<ToastsContainer store={ToastsStore}/>
 			</Grid>
 		);
 	}
