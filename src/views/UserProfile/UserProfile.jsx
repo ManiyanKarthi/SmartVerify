@@ -18,8 +18,8 @@ class UserProfile extends React.Component {
 		super(props);
 		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, zoomImageFlag: false,
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true};
-		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"},{"title":"Select","field":"select","type":"date"}];
-		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"verify_status","type":"numeric"}];
+		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
+		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billData = {billType:'', billDate:'', billAmount:'', billStatus:'', automlPrediction:'', manualPrediction:'', billImage:''};
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.billType = 0;
@@ -168,8 +168,10 @@ class UserProfile extends React.Component {
 		let url = "/invoice/get-invoice-details/"+data["_id"];
 		new FetchApi().getInvoiceDetails({body: {}, url: url, success: function(res){
 			let invoiceData = res.invoice_list[0];
-			_this.setState({"enableDetails":true, "billData":{billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.verify_status, 
-			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}}, function(){
+			let hideSmartVerify = (invoiceData.verify_status > 0) ? true : false;
+			_this.setState({"enableDetails":true, billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.bill_status, 
+			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, hideSmartVerify: hideSmartVerify,
+			billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}, function(){
 				_this.forceUpdate();
 			});
 		}});
@@ -190,7 +192,9 @@ class UserProfile extends React.Component {
 					this.state.homePageShowFlag ? 
 					<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px"}}>
 						<Grid item>
-							<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
+							<TextField label= {"Employee ID"} value={this.state.employeeID} 
+								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
+								onKeyPress={(e) => { if(e.key === "Enter") { this.serachEmployeeDetails(); }}}/>
 						</Grid>
 						<Grid item>
 							<Select style={{"padding":"8px"}}
@@ -249,7 +253,18 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Bill Type:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.billType}</label>
+											<Select style={{"padding":"8px"}}
+												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
+												{
+													this.state.billTypeList.map((item, index) => {
+														return (
+															<MenuItem value={index} key={index}>
+																<em>{item}</em>
+															</MenuItem>
+														);
+													})
+												}
+											</Select>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -257,7 +272,7 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Date:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.billDate}</label>
+											<TextField value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -265,7 +280,7 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Amount:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.billAmount}</label>
+											<TextField type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -273,7 +288,7 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Status:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.billStatus}</label>
+											<label className="popupLabelValue">{this.state.billStatus}</label>
 										</Grid>
 									</Grid> 
 									<Grid container className={"gridSpaceForm"} style={{"marginTop":"15px"}}>
@@ -281,7 +296,7 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">AutoML Prediction:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.automlPrediction}</label>
+											<TextField type="number" value={this.state.automlPrediction} onChange={(e) => {this.setState({"automlPrediction": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -289,19 +304,19 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Vision Text Prediction:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<label className="popupLabelValue">{this.state.billData.manualPrediction}</label>
+											<TextField type="number" value={this.state.manualPrediction} onChange={(e) => {this.setState({"manualPrediction": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 								</Grid>
 							</Grid>
 							<Grid item xs={4}>
 								<Grid item xs={12} className={"gridSpaceContainer"} style={{"textAlign":"center"}}>
-									<img style={{"maxWidth":"100%", "maxHeight":"400px"}} src={this.state.billData.billImage} alt="Bill"/>
+									<img style={{"maxWidth":"100%", "maxHeight":"400px"}} src={this.state.billImage} alt="Bill"/>
 								</Grid>
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center"}}>
-							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} >
+							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":(this.state.hideSmartVerify ? "none":"")}}>
 								Smart Verify
 							</Button>&nbsp;&nbsp;
 							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} >
