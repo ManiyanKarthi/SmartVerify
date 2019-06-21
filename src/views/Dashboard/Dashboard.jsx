@@ -19,7 +19,7 @@ class Dashboard extends React.Component {
 		super(props);
 		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", showLoaderImage: false,
 					showSearchContainer: false, showSuccessMessage: false, showErrorMessage: false, dialogStatus:false};
-		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
+		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.billType = 0;
 		this.state.billDate = this.getCurrentDate();
@@ -107,14 +107,16 @@ class Dashboard extends React.Component {
 				file: file,
 				imagePreviewUrl: reader.result
 			}, function(){
-				_this.smartVerify();
+				if(this.state.NewSmartVerify){
+					_this.smartVerify();
+				}
 			});
 		}
 		reader.readAsDataURL(file);
 	}
 
 	serachEmployeeDetails(){
-		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth};
+		let data = {emp_id: this.state.employeeID, month_year: this.state.billMonth};
 		if(this.state.employeeID){
 			this.getInvoices(data);
 		}
