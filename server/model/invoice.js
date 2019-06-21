@@ -226,6 +226,9 @@ exports.getEmployeeInvoiceDetails = (invoice_id) => {
 				bill_amount:"$bill_amount",
 				verify_status:"$verify_status",
 				image_name:"$image_name",
+				bill_transaforms:"$bill_transaforms",
+				automl_prediction:"$automl_prediction",
+				bill_type:"$bill_type",
 				bill_date:{ $dateToString: { format: "%d-%m-%Y", date: "$bill_date",timezone: 'Asia/Kolkata'} }				             
 			}}
 		]).toArray(function(err, invoice_result) 	{							

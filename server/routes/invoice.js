@@ -23,16 +23,8 @@ const storeage_path = './server/public/images/invoice';
 const storeage_url = 'images/invoice/';
 
 /* GET users listing. */
-router.get('/', (req, res, next) => {
-	//let DB = req.db;
-	//var DB = req.app.get('dbo');
-	InvoiceData = {image:'flooo.jpg',type:8};
-	InvoiceModel.InsertInvoice(InvoiceData);
-	DB.collection("invoice").findOne({}, function(err, result) {
-		if (err) throw err;
-		console.log(result);    
-	});
-  res.send('respond with a resource');
+router.get('/', (req, res, next) => {	
+	res.send('respond with a resource');
 });
 
 router.post('/add', [
@@ -83,14 +75,8 @@ router.get('/getinvoices', async (req, res, next) => {
 		//let invoice_total = await InvoiceModel.GetInvoices(filter_query,1);
 		
 		invoice_list.forEach(function(part, index, theArray) {
-			//console.log(theArray[index].bill_type,'theArray.bill_type');
-			if(theArray[index].bill_type==1){
-				theArray[index].bill_type = 'Fuel';
-			}else if(theArray[index].bill_type==2){
-				theArray[index].bill_type = 'Toll';
-			}else{
-				theArray[index].bill_type = 'Other';
-			}
+			//console.log(theArray[index].bill_type,'theArray.bill_type');			
+			theArray[index].bill_type = CommonModel.GetBillType(theArray[index].bill_type);			
 			let month_num_arr = theArray[index].bill_date.split('-');
 			let bill_mon = getMonthName(month_num_arr[1]);
 			theArray[index].bill_month = `${bill_mon} - ${month_num_arr[2]}`;			
@@ -156,7 +142,12 @@ router.get('/get-invoice-details/:id', async (req, res, next) => {
 				}else{
 					invoice_list[0].invoice_image_loc = '';
 				}
+				invoice_list[0].bill_type = CommonModel.GetBillType(invoice_list[0].bill_type);	
 				invoice_list[0].bill_status = CommonModel.BillStatus(invoice_list[0].verify_status);
+				if(invoice_list[0].verify_status==1){					
+					invoice_list[0].automl_prediction_percentage = await CommonModel.GetPredictionScore(invoice_list[0].automl_prediction);					
+				}
+				delete invoice_list[0].automl_prediction;			
 				res.json({ status:200,invoice_list:invoice_list});
 			}else{
 				res.json({ status:203,invoice_list:invoice_list});
@@ -202,7 +193,8 @@ router.post('/smart-verify',[
 	  console.log(`Prediction results:`);
 	  //var bill_type =1;
 	  console.log(response);	  
-	  var bill_type = await CommonModel.BillType(response);  		
+	  var bill_type = await CommonModel.BillType(response); 
+	  var bill_prediction_data = await CommonModel.GetPredictionScore(response);	  
 	/*
 	  response.payload.forEach(result => {
 		console.log(result);
@@ -241,6 +233,7 @@ router.post('/smart-verify',[
 		  }else{
 			  billed_amount = 0;
 		  }
+		  bill_transaforms['prediction'] = bill_prediction_data;
 		  //var bill_date_convert = new Date(bill_transaforms.bill_date);
 		  InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,image_name:act_image_name,created_at:new Date(),verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result};
 		  

@@ -15,6 +15,8 @@ exports.BillType = (bill_response)=> {
 				  bill_type = 2;
 				  console.log(2,'BillType');				 
 			  }
+		  }else{
+			bill_type = 3;	
 		  }			  
 		}else{
 			bill_type = 3;
@@ -398,13 +400,10 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			let search_nozzle_no = search_store.search(/nozzle no/i);
 			let search_fuel = search_store.search(/fuel/i);
 			let search_petrol = search_store.search(/petrol/i);
-			let search_diesel = search_store.search(/diesel/i);
+			let search_diesel = search_store.search(/diesel/i);			
 			
-			
-			console.log(data_store);
-			
-			resolve(reconization_data);
-			
+			console.log(data_store);			
+			resolve(reconization_data);			
 		}else{
 			resolve(0);
 		}
@@ -434,4 +433,33 @@ exports.BillStatus = (bill_status)=> {
 			status_res="No status";
 		}
 		return status_res;	
+}
+
+exports.GetBillType = (bill_type)=> {	
+		var status_res;
+		switch (bill_type) {		  
+		  case 1:
+			status_res = "Fuel";
+			break;
+		  case 2:
+			status_res = "Toll";
+			break;		 
+		  default:
+			status_res="Other";
+		}
+		return status_res;	
+}
+
+exports.GetPredictionScore = (bill_response)=> {	
+	return new Promise( (resolve, reject) => {
+		var response = bill_response;
+		//console.log(bill_response,'bill_response',response,'response');		
+		if(response && response.payload.length > 0 && response.payload[0].displayName && response.payload[0].classification.score){	
+			//console.log(response.payload[0].classification.score,'response.payload[0].classification.score');
+			resolve(parseFloat(response.payload[0].classification.score).toFixed(3));
+		}else{
+			console.log(bill_type,'BillType');
+			resolve(0);
+		}
+	})	
 }
