@@ -26,9 +26,15 @@ function fetchData(props) {
   xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
   xhr.timeout = props.timeout ? props.timeout : 30000;
   xhr.ontimeout = function() {
-    props.onTimeout();
+    if(props.onTimeout){
+      props.onTimeout();
+    }
   };
-  xhr.send(JSON.stringify(props.body));
+  let json;
+  if(props.body){
+    json = JSON.stringify(props.body);
+  }
+  xhr.send(json);
 }
 
 class FetchApi {

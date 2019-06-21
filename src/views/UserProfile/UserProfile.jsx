@@ -10,7 +10,7 @@ import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Fab from '@material-ui/core/Fab';
-import BackIcon from '@material-ui/icons/Backspace';
+import BackIcon from '@material-ui/icons/ArrowLeft';
 
 class UserProfile extends React.Component {
  
