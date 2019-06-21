@@ -166,10 +166,14 @@ class UserProfile extends React.Component {
 
 	onDetailedRowClick(event, data){
 		let _this = this;
-		this.setState({"enableDetails":true, "billData":{billType: data.bill_type, billDate: data.bill_date, billAmount: data.bill_amount, billStatus: 'Submitted', 
-					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox2pwjx4bj8l1.jpg'}}, function(){
-						_this.forceUpdate();
-					});
+		let url = "/invoice/get-invoice-details/"+data["_id"];
+		new FetchApi().getInvoiceDetails({body: {}, url: url, success: function(res){
+			let invoiceData = res.invoice_list[0];
+			_this.setState({"enableDetails":true, "billData":{billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.verify_status, 
+			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}}, function(){
+				_this.forceUpdate();
+			});
+		}});
 	}
 
 	zoomImage(){
@@ -226,13 +230,13 @@ class UserProfile extends React.Component {
 							</Fab>
 						</Grid>
 						<Grid container style={{"padding":"20px"}}>
-							<Grid item xs={6} style={{padding:"15px"}}>
+							<Grid item xs={4} style={{padding:"15px"}}>
 								<MaterialTable title="" search = {false}
 									columns={this.state.tableDetailedColumns}
 									data={this.state.tableDetailedData}
 									onRowClick={this.onDetailedRowClick} />
 							</Grid>
-							<Grid container item xs={3} style={{padding:"15px", "textAlign":"left", "maxHeight":"500px"}}>
+							<Grid container item xs={4} style={{padding:"15px", "textAlign":"left", "maxHeight":"500px"}}>
 								<Grid container item xs={12}>
 									<Grid item xs={8}>
 										<label className="popupLabelText">Bill Type:</label>
@@ -282,7 +286,7 @@ class UserProfile extends React.Component {
 									</Grid>
 								</Grid>
 							</Grid>
-							<Grid item xs={3} style={{padding:"15px", "textAlign":"center"}}>
+							<Grid item xs={4} style={{padding:"15px", "textAlign":"center"}}>
 								<img style={{"maxWidth":"100%", "maxHeight":"500px"}} src={this.state.billData.billImage} alt="Bill"/>
 							</Grid>
 						</Grid>

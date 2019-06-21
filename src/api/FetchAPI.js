@@ -43,6 +43,10 @@ class FetchApi {
     this.baseurl = "http://localhost:3001";
   }
 
+  appendURL(url){
+    return this.baseurl + url;
+  }
+
   serachEmployeeDetails(props) {
     props.url = this.baseurl + "/invoice/getinvoices";
     props.method = "GET";
@@ -69,6 +73,12 @@ class FetchApi {
 
   getEmployeeForVerificationInvoiceDetails(props) {
     props.url = this.baseurl + "/invoice/list-employee-invoices";
+    props.method = "GET";
+    fetchData(props);
+  }
+
+  getInvoiceDetails(props) {
+    props.url = this.baseurl + props.url;
     props.method = "GET";
     fetchData(props);
   }
