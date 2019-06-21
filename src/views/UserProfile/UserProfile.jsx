@@ -18,8 +18,8 @@ class UserProfile extends React.Component {
 		super(props);
 		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, zoomImageFlag: false,
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true};
-		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
-		this.state.tableDetailedColumns = [{"title":"Month","field":"name","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
+		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"},{"title":"Select","field":"select","type":"date"}];
+		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"verify_status","type":"numeric"}];
 		this.state.billData = {billType:'', billDate:'', billAmount:'', billStatus:'', automlPrediction:'', manualPrediction:'', billImage:''};
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.billType = 0;
@@ -89,7 +89,7 @@ class UserProfile extends React.Component {
 	getInvoices(param){
 		let _this = this;
 		new FetchApi().getEmployeeForVerification({body: param, success: function(res){
-			_this.setState({"tableData": res.invoices, "showSearchContainer": true}, function () {
+			_this.setState({"tableData": res.invoice_list, "showSearchContainer": true}, function () {
 				_this.forceUpdate();
 			});
 		}});
@@ -153,10 +153,12 @@ class UserProfile extends React.Component {
 		// console.log(event, data);
 		let _this = this;
 		this.setState({"homePageShowFlag": false}, function(){
-			let paramObj = {emp_id: data.employeeID, bill_month: data.billMonth, from: 0, limit: 10};
-			new FetchApi().serachEmployeeDetails({body: paramObj, success: function(res){
-				_this.setState({"tableDetailedData": res.invoices, "showSearchContainer": true}, function () {
-					_this.onDetailedRowClick({}, _this.state.tableDetailedData[0]);
+			let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
+			new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
+				_this.setState({"tableDetailedData": res.invoice_list, "showSearchContainer": true}, function () {
+					if(_this.state.tableDetailedData && _this.state.tableDetailedData.length > 0){
+						_this.onDetailedRowClick({}, _this.state.tableDetailedData[0]);
+					}
 				});
 			}});
 		});

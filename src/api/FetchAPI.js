@@ -62,7 +62,13 @@ class FetchApi {
   }
 
   getEmployeeForVerification(props) {
-    props.url = this.baseurl + "/invoice/getinvoices";
+    props.url = this.baseurl + "/invoice/get-monthwise-invoices";
+    props.method = "GET";
+    fetchData(props);
+  }
+
+  getEmployeeForVerificationInvoiceDetails(props) {
+    props.url = this.baseurl + "/invoice/list-employee-invoices";
     props.method = "GET";
     fetchData(props);
   }
