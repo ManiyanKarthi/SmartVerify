@@ -116,7 +116,7 @@ class Dashboard extends React.Component {
 	}
 
 	serachEmployeeDetails(){
-		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth};
+		let data = {emp_id: this.state.employeeID, month_year: this.state.billMonth};
 		if(this.state.employeeID){
 			this.getInvoices(data);
 		}
