@@ -142,7 +142,7 @@ router.get('/get-invoice-details/:id', async (req, res, next) => {
 				}else{
 					invoice_list[0].invoice_image_loc = '';
 				}
-				invoice_list[0].bill_type = CommonModel.GetBillType(invoice_list[0].bill_type);	
+				//invoice_list[0].bill_type = CommonModel.GetBillType(invoice_list[0].bill_type);	
 				invoice_list[0].bill_status = CommonModel.BillStatus(invoice_list[0].verify_status);
 				if(invoice_list[0].verify_status==1){					
 					invoice_list[0].automl_prediction_percentage = await CommonModel.GetPredictionScore(invoice_list[0].automl_prediction);					
