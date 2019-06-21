@@ -11,12 +11,13 @@ import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Dialog from '@material-ui/core/Dialog';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
+import LoaderImg from '../../assets/img/Loader.svg'
 
 class Dashboard extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", 
+		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", showLoaderImage: false,
 					showSearchContainer: false, showSuccessMessage: false, showErrorMessage: false, dialogStatus:false};
 		this.state.tableColumns = [{"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill type","field":"bill_type","type":"numeric"},{"title":"Bill No","field":"bill_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
@@ -72,6 +73,7 @@ class Dashboard extends React.Component {
 			bill_amount:this.state.billAmount,
 			bill_image:this.state.imagePreviewUrl
 		};
+		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
 		new FetchApi().addNewBill({body: paramObj, success: function(data){
 			if(data.message === "Success"){
 				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
@@ -90,6 +92,9 @@ class Dashboard extends React.Component {
 				}
 				_this.setState({showSuccessMessage: false, showErrorMessage: true, errorMessage: msg, successMessage: ''});
 			}
+			_this.setState({"showLoaderImage":false});
+		}, error: function(){
+			_this.setState({"showLoaderImage":false, showSuccessMessage: false, showErrorMessage: true, errorMessage: "Error", successMessage: ''});
 		}});
 	}
 
@@ -136,8 +141,9 @@ class Dashboard extends React.Component {
 			employee_no: this.state.employeeID,
 			bill_image:this.state.imagePreviewUrl
 		};
-
+		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
 		new FetchApi().smartVerifyBill({body: paramObj, success: function(data){
+			_this.setState({"showLoaderImage": false});
 			if(data.status === 200){
 				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart verified'};
 				updateObj.billDate = data.prediction_data.date;
@@ -152,7 +158,7 @@ class Dashboard extends React.Component {
 				_this.setState(updateObj);
 			}
 		}, timeout: 30000, onTimeout: function(){
-			let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed due to timeout', successMessage: ''};
+			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed due to timeout', successMessage: ''};
 			_this.setState(updateObj);
 		}});
 	}
@@ -183,7 +189,9 @@ class Dashboard extends React.Component {
 				<Grid  item container xs={12}>
 					<Grid item container xs={7} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
 						<Grid item>
-							<TextField label= {"Employee ID"} value={this.state.employeeID} onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}/>
+							<TextField label= {"Employee ID"} value={this.state.employeeID} 
+								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
+								onKeyPress={(e) => { if(e.key === "Enter") { this.serachEmployeeDetails(); } }}/>
 						</Grid>
 						<Grid item>
 							<Select style={{"padding":"8px"}}
@@ -264,6 +272,11 @@ class Dashboard extends React.Component {
 											</Button>&nbsp;&nbsp;
 											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
 												Clear
+											</Button>
+										</Grid>
+										<Grid item xs={12} style={{"textAlign":"center"}}>
+											<Button style={{"display":(this.state.showLoaderImage ? "" : "none")}}>
+												<img src={LoaderImg} style={{"width":"25px"}}/>
 											</Button>
 										</Grid>
 										<Grid item xs={12}>

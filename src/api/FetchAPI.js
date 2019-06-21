@@ -18,13 +18,8 @@ function fetchData(props) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4 && xhr.response) {
-      console.log();
       let json = JSON.parse(xhr.response);
       props.success(json);
-    } else {
-      if (props.error) {
-        props.error();
-      }
     }
   };
   xhr.open(props.method, props.url, true);
@@ -37,7 +32,7 @@ function fetchData(props) {
 }
 
 class FetchApi {
-  constructor(props) {
+  constructor() {
     // this.baseurl = "http://10.165.7.169:3001";
     this.baseurl = "http://localhost:3001";
   }
