@@ -99,15 +99,18 @@ class Dashboard extends React.Component {
 	}
 
 	handleImageChange(e) {
+		let _this = this;
 		let reader = new FileReader();
 		let file = e.target.files[0];
 		reader.onloadend = () => {
 			this.setState({
 				file: file,
 				imagePreviewUrl: reader.result
+			}, function(){
+				_this.smartVerify();
 			});
 		}
-		reader.readAsDataURL(file)
+		reader.readAsDataURL(file);
 	}
 
 	serachEmployeeDetails(){
@@ -267,14 +270,14 @@ class Dashboard extends React.Component {
 											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
 												Add
 											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} style={{"display": (this.state.NewSmartVerify ? "" : "none")}}>
+											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} style={{"display": "none"}}>
 												Smart Verify
 											</Button>&nbsp;&nbsp;
 											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
 												Clear
 											</Button>
 										</Grid>
-										<Grid item xs={12} style={{"textAlign":"center"}}>
+										<Grid item xs={12} style={{"textAlign":"center", "paddingTop":"10px"}}>
 											<Button style={{"display":(this.state.showLoaderImage ? "" : "none")}}>
 												<img src={LoaderImg} style={{"width":"25px"}}/>
 											</Button>
