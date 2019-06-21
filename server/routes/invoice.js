@@ -285,7 +285,7 @@ router.post('/smart-verify',[
 					  console.log(response);	  
 					  var bill_type = await CommonModel.BillType(response); 
 					  var bill_prediction_data = await CommonModel.GetPredictionScore(response);
-					  
+					  //console.log(bill_type,'bill_type--->');
 					  const client_detection = new vision.ImageAnnotatorClient();
 					  const [doc_result] = await client_detection.documentTextDetection(filePath_Loc);
 					  const fullTextAnnotation = doc_result.fullTextAnnotation;	  
@@ -295,8 +295,7 @@ router.post('/smart-verify',[
 					  
 					  if(bill_transaforms==0){
 						  res.json({ status:202,message:'Invalid bill'});
-					  }else{
-					  
+					  }else{					  
 						  //{bill_number:bill_number,net_sales:net_sales,bill_date:bill_date};
 						  var unixTimeZero = Date.parse(bill_transaforms.bill_date);
 						  var billed_format_date,billed_amount;
@@ -304,8 +303,7 @@ router.post('/smart-verify',[
 						  if(unixTimeZero && unixTimeZero>0){
 								billed_format_date = new Date(unixTimeZero);
 								billed_disp_date = UnixTimeToDate(unixTimeZero);
-						  }
-						
+						  }						
 						  if(!isNaN(bill_transaforms.net_sales)){
 							  billed_amount = bill_transaforms.net_sales;
 						  }else{
@@ -313,15 +311,18 @@ router.post('/smart-verify',[
 						  }
 						  bill_transaforms['prediction'] = bill_prediction_data;
 						  //var bill_date_convert = new Date(bill_transaforms.bill_date);
-						  InvoiceData = {bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};
-						  
+						  InvoiceData = {bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};						  
 						  if(billed_format_date){
 							  InvoiceData.bill_date = billed_format_date;
+						  }						  
+						  let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);						  
+						  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type,bill_prediction:bill_prediction_data};
+						  if(billed_disp_date =='' || billed_amount ==0 || bill_transaforms.bill_number ==''){
+							  var message='Smart verify data missing';
+						  }else{
+							  var message='Smart verify successfully';
 						  }
-						  
-						  let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData); 	  
-						  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type,bill_prediction:bill_prediction_data};	  
-						  res.json({ status:200,message:'Smart verify successfully',prediction_response:prediction_res});
+						  res.json({ status:200,message:message,prediction_response:prediction_res});						  
 					  }					
 				}else{
 					res.json({ status:402,message:"Invoice file not found"});

@@ -458,7 +458,7 @@ exports.GetPredictionScore = (bill_response)=> {
 			//console.log(response.payload[0].classification.score,'response.payload[0].classification.score');
 			resolve(parseFloat(response.payload[0].classification.score).toFixed(3));
 		}else{
-			console.log(bill_type,'BillType');
+			//console.log(bill_type,'BillType');
 			resolve(0);
 		}
 	})	
