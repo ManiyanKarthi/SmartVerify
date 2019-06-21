@@ -11,6 +11,7 @@ import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Fab from '@material-ui/core/Fab';
 import BackIcon from '@material-ui/icons/ArrowLeft';
+import {ToastsContainer, ToastsStore} from 'react-toasts';
 
 class UserProfile extends React.Component {
  
@@ -99,42 +100,45 @@ class UserProfile extends React.Component {
 
 		let _this = this;
 		let paramObj = { 
-			bill_image:this.state.imagePreviewUrl
+			bill_id:this.state.billID
 		};
 
-		new FetchApi().smartVerifyBill(paramObj, function(data){
+		new FetchApi().smartVerifyStoredBill({body: paramObj, success: function(data){
 			if(data.message === "Success"){
-				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+				ToastsStore.success("Smart verified successfully");
+				_this.onRowClick(_this.billOneClickData);
 			}
-		});
+		}});
 	}
 	
 	manualVerify(){
 
 		let _this = this;
 		let paramObj = { 
-			bill_image:this.state.imagePreviewUrl
+			bill_id:this.state.billID
 		};
 
-		new FetchApi().smartVerifyBill(paramObj, function(data){
+		new FetchApi().manualVerify({body: paramObj, success: function(data){
 			if(data.message === "Success"){
-				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+				ToastsStore.success("Manual verified successfully");
+				_this.onRowClick(_this.billOneClickData);
 			}
-		});
+		}});
 	}
 	
 	rejectForm(){
 
 		let _this = this;
 		let paramObj = { 
-			bill_image:this.state.imagePreviewUrl
+			bill_id:this.state.billID
 		};
 
-		new FetchApi().smartVerifyBill(paramObj, function(data){
+		new FetchApi().rejectBill({body: paramObj, success: function(data){
 			if(data.message === "Success"){
-				_this.setState({showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Bill added successfully'});
+				ToastsStore.success("Bill rejected");
+				_this.onRowClick(_this.billOneClickData);
 			}
-		});
+		}});
 	}
 
 	showNextPage(){
@@ -151,9 +155,10 @@ class UserProfile extends React.Component {
 
 	onRowClick(event, data){
 		let _this = this;
+		this.billOneClickData = data;
 		let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
 		new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
-			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, 
+			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, "clickedBillMonth": data.bill_month,
 				"tableDetailedData": res.invoice_list, "showSearchContainer": true}, 
 				function () {
 					if(_this.state.tableDetailedData && _this.state.tableDetailedData.length > 0){
@@ -170,7 +175,7 @@ class UserProfile extends React.Component {
 			let invoiceData = res.invoice_list[0];
 			let hideSmartVerify = (invoiceData.verify_status > 0) ? true : false;
 			_this.setState({"enableDetails":true, billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.bill_status, 
-			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, hideSmartVerify: hideSmartVerify,
+			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, hideSmartVerify: hideSmartVerify, billID: invoiceData["_id"],
 			billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}, function(){
 				_this.forceUpdate();
 			});
@@ -235,6 +240,9 @@ class UserProfile extends React.Component {
 							</Grid>
 							<Grid item style={{"padding":"18px 30px", "fontSize":"20px"}}>
 								<span style={{"fontWeight":"bold"}}>Employee ID: </span><span>{this.state.clickedEmployeeID}</span>
+							</Grid>
+							<Grid item style={{"padding":"18px 30px", "fontSize":"20px"}}>
+								<span style={{"fontWeight":"bold"}}>Bill Month: </span><span>{this.state.clickedBillMonth}</span>
 							</Grid>
 						</Grid>
 						<Grid container spacing={2} style={{"padding":"20px"}}>
@@ -328,6 +336,7 @@ class UserProfile extends React.Component {
 						</Grid>
 					</Grid>	
 				}
+				<ToastsContainer store={ToastsStore}/>
 			</Grid>
 		);
 	}
