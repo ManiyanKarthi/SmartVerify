@@ -9,6 +9,8 @@ import TextField from "@material-ui/core/TextField"
 import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
+import Fab from '@material-ui/core/Fab';
+import BackIcon from '@material-ui/icons/Backspace';
 
 class UserProfile extends React.Component {
  
@@ -39,7 +41,7 @@ class UserProfile extends React.Component {
 		this.getInvoices();
 	}
 
-	generateBillMonth(curMon){
+	generateBillMonth(){
 		let dt = new Date();
 		let month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 		let list = [];
@@ -86,14 +88,14 @@ class UserProfile extends React.Component {
 
 	getInvoices(param){
 		let _this = this;
-		new FetchApi().getEmployeeForVerification(param, function(res){
+		new FetchApi().getEmployeeForVerification({body: param, success: function(res){
 			_this.setState({"tableData": res.invoices, "showSearchContainer": true}, function () {
 				_this.forceUpdate();
 			});
-		});
+		}});
 	}
 	
-	smartVerify(e){
+	smartVerify(){
 
 		let _this = this;
 		let paramObj = { 
@@ -107,7 +109,7 @@ class UserProfile extends React.Component {
 		});
 	}
 	
-	manualVerify(e){
+	manualVerify(){
 
 		let _this = this;
 		let paramObj = { 
@@ -121,7 +123,7 @@ class UserProfile extends React.Component {
 		});
 	}
 	
-	rejectForm(e){
+	rejectForm(){
 
 		let _this = this;
 		let paramObj = { 
@@ -152,18 +154,20 @@ class UserProfile extends React.Component {
 		let _this = this;
 		this.setState({"homePageShowFlag": false}, function(){
 			let paramObj = {emp_id: data.employeeID, bill_month: data.billMonth, from: 0, limit: 10};
-			new FetchApi().serachEmployeeDetails(paramObj, function(res){
+			new FetchApi().serachEmployeeDetails({body: paramObj, success: function(res){
 				_this.setState({"tableDetailedData": res.invoices, "showSearchContainer": true}, function () {
-					_this.forceUpdate();
+					_this.onDetailedRowClick({}, _this.state.tableDetailedData[0]);
 				});
-			});
+			}});
 		});
 	}
 
 	onDetailedRowClick(event, data){
-		console.log(event, data);
+		let _this = this;
 		this.setState({"enableDetails":true, "billData":{billType: data.bill_type, billDate: data.bill_date, billAmount: data.bill_amount, billStatus: 'Submitted', 
-					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox2pwjx4bj8l1.jpg'}});
+					automlPrediction:'90%', manualPrediction:'100%', billImage:'http://localhost:3000/images/invoice/4utox2pwjx4bj8l1.jpg'}}, function(){
+						_this.forceUpdate();
+					});
 	}
 
 	zoomImage(){
@@ -214,6 +218,11 @@ class UserProfile extends React.Component {
 					</Grid>
 					:
 					<Grid item container xs={12}>
+						<Grid style={{"textAlign":"center"}}>
+							<Fab aria-label="Add" onClick={()=>{this.setState({"homePageShowFlag":true})}} >
+								<BackIcon />
+							</Fab>
+						</Grid>
 						<Grid container style={{"padding":"20px"}}>
 							<Grid item xs={6} style={{padding:"15px"}}>
 								<MaterialTable title="" search = {false}
@@ -221,7 +230,7 @@ class UserProfile extends React.Component {
 									data={this.state.tableDetailedData}
 									onRowClick={this.onDetailedRowClick} />
 							</Grid>
-							<Grid container item xs={2} style={{padding:"15px", "textAlign":"left"}}>
+							<Grid container item xs={3} style={{padding:"15px", "textAlign":"left", "maxHeight":"500px"}}>
 								<Grid container item xs={12}>
 									<Grid item xs={8}>
 										<label className="popupLabelText">Bill Type:</label>
@@ -271,11 +280,8 @@ class UserProfile extends React.Component {
 									</Grid>
 								</Grid>
 							</Grid>
-							<Grid item xs={4} style={{padding:"15px", "textAlign":"center"}}>
-								<Grid item xs={12}>
-									<img style={{"maxWidth":"100%", "cursor":"pointer"}} src={this.state.billData.billImage}
-										onClick={this.zoomImage} alt="Bill"/>
-								</Grid>
+							<Grid item xs={3} style={{padding:"15px", "textAlign":"center"}}>
+								<img style={{"maxWidth":"100%", "maxHeight":"500px"}} src={this.state.billData.billImage} alt="Bill"/>
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center"}}>

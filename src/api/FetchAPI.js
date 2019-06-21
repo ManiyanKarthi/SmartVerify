@@ -55,8 +55,10 @@ class FetchApi {
     fetchData(props);
   }
 
-  getEmployeeForVerification(data, callback) {
-    fetchData(this.baseurl + "/invoice/getinvoices", "GET", data, callback);
+  getEmployeeForVerification(props) {
+    props.url = this.baseurl + "/invoice/getinvoices";
+    props.method = "GET";
+    fetchData(props);
   }
 }
 
