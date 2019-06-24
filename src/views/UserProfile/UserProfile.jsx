@@ -10,7 +10,7 @@ import "../../assets/css/previewimage.css";
 import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Fab from '@material-ui/core/Fab';
-import BackIcon from '@material-ui/icons/ArrowLeft';
+import BackIcon from '@material-ui/icons/ArrowBack';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
 import LoaderImg from '../../assets/img/Loader.svg'
 
@@ -200,11 +200,11 @@ class UserProfile extends React.Component {
 
 	zoomInImage(event){
 		var element = document.getElementById("overlay");
-		element.style.display = "none"; // "inline-block";
+		element.style.display = "inline-block";
 		var img = document.getElementById("overlayOriginalImage");
 		var posX = event.nativeEvent.offsetX ? (event.nativeEvent.offsetX) : event.nativeEvent.pageX - img.offsetLeft;
 		var posY = event.nativeEvent.offsetY ? (event.nativeEvent.offsetY) : event.nativeEvent.pageY - img.offsetTop;
-		element.style.backgroundPosition = (-posX * 4) + "px " + (-posY * 4) + "px";
+		element.style.backgroundPosition = (-posX * (img.naturalWidth / img.width) + (element.offsetWidth / 2)) + "px " + (-posY * (img.naturalHeight / img.height) + (element.offsetHeight / 2)) + "px";
 	}
 
 	zoomOutImage() {
@@ -260,7 +260,7 @@ class UserProfile extends React.Component {
 						<Grid container style={{"textAlign":"center"}} direction={"row"}>
 							<Grid item> 
 								<Fab aria-label="Add" onClick={()=>{this.setState({"homePageShowFlag":true})}} >
-									<BackIcon />
+									<BackIcon  style={{fontSize: "32px"}}/>
 								</Fab>
 							</Grid>
 							<Grid item style={{"padding":"18px 30px", "fontSize":"20px"}}>
