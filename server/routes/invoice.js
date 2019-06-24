@@ -16,7 +16,7 @@ var appDir = require('app-root-path');
 
 const projectId = 'montgomery-242210';
 const computeRegion = 'us-central1';
-const modelId = 'ICN5128000347661266160';
+const modelId = 'ICN8880303229401271842';//'ICN5128000347661266160';
 const filePath = './public/images/sample_petrol_bill.jpg';
 const scoreThreshold = '0.6';
 const storeage_path = './server/public/images/invoice';
