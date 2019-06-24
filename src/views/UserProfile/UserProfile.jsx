@@ -38,6 +38,7 @@ class UserProfile extends React.Component {
 		this.manualVerify = this.manualVerify.bind(this);
 		this.rejectForm = this.rejectForm.bind(this);
 
+		//verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
 		this.getInvoices();
 	}
 
@@ -341,10 +342,10 @@ class UserProfile extends React.Component {
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center", "minHeight":"36px"}}>
-							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":(this.state.invoiceDataStatus > 0 ? "none":"")}}>
+							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":((this.state.invoiceDataStatus == 0 || this.state.invoiceDataStatus == 2) ? "":"none")}}>
 								Smart Verify
 							</Button>&nbsp;&nbsp;
-							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 1 ? "none":"")}}>
+							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
 								Manual Verify
 							</Button>&nbsp;&nbsp;
 							<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
