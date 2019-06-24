@@ -206,6 +206,8 @@ class UserProfile extends React.Component {
 
 	render() {
 
+		let disableEdit = this.state.invoiceDataStatus > 2 ? true : false;
+
 		return (
 			<Grid container>
 				{
@@ -276,7 +278,7 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Bill Type:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<Select style={{"padding":"8px"}}
+											<Select style={{"padding":"8px"}} disabled={disableEdit}
 												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
 												{
 													this.state.billTypeList.map((item, index) => {
@@ -295,7 +297,8 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Date:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<TextField value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
+											<TextField value={this.state.billDate} type={"date"} disabled={disableEdit}
+												onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -303,7 +306,8 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Amount:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<TextField type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
+											<TextField type="number" value={this.state.billAmount} disabled={disableEdit}
+												onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -319,7 +323,8 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">AutoML Prediction:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<TextField type="number" value={this.state.automlPrediction} onChange={(e) => {this.setState({"automlPrediction": e.currentTarget.value})}}/>
+											<TextField type="number" value={this.state.automlPrediction}  disabled={disableEdit} 
+												onChange={(e) => {this.setState({"automlPrediction": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
@@ -327,7 +332,8 @@ class UserProfile extends React.Component {
 											<label className="popupLabelText">Vision Text Prediction:</label>
 										</Grid>
 										<Grid item xs={4}>
-											<TextField type="number" value={this.state.manualPrediction} onChange={(e) => {this.setState({"manualPrediction": e.currentTarget.value})}}/>
+											<TextField type="number" value={this.state.manualPrediction} disabled={disableEdit}
+												onChange={(e) => {this.setState({"manualPrediction": e.currentTarget.value})}}/>
 										</Grid>
 									</Grid>
 								</Grid>
