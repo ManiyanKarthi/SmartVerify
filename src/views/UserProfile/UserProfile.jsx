@@ -27,7 +27,6 @@ class UserProfile extends React.Component {
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10, autoMLStatus: {},
 					billType: 0 , billDate:'', billStatus:'', automlPrediction:0, billImage:''};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
-		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
 		this.state.monthData = this.generateBillMonth();
 		this.state.billMonth = this.state.monthData.monthList[0].value;
@@ -290,7 +289,7 @@ class UserProfile extends React.Component {
 						</Grid>
 						<Grid container spacing={2} style={{"padding":"20px"}}>
 							<Grid item xs={4} className={"gridSpaceContainer"}>
-								<Grid item xs={12}>
+								<Grid item xs={12} style={{"height":"100%"}}>
 									<Table>
 										<TableHead>
 											<TableRow>
@@ -424,7 +423,7 @@ class UserProfile extends React.Component {
 								</Grid>
 							</Grid>
 							<Grid item xs={4} className={"gridSpaceContainer"}>
-								<Grid item xs={12} style={{"textAlign":"center", "position":"relative"}}>
+								<Grid item xs={12} style={{"textAlign":"center", "position":"relative", "height":"100%"}}>
 									<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
 										className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
 									<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"-webkit-fill-available"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
