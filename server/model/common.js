@@ -14,7 +14,7 @@ exports.BillType = (bill_response)=> {
 			  }else if(response.payload[0].displayName=='TollBill'){
 				  bill_type = 2;
 				  console.log(2,'BillType');				 
-			  }
+			  }else{ bill_type = 3; }
 		  }else{
 			bill_type = 3;	
 		  }			  

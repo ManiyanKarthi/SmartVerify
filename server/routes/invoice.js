@@ -179,74 +179,79 @@ router.post('/smart-verify',[
 	  
 	  var Orgbase64Data = req.body.bill_image;
 	  var base64Data = req.body.bill_image.replace(/^data:image\/[a-z]+;base64,/, "");
-	  const client = new automl.PredictionServiceClient();
-	  const modelFullId = client.modelPath(projectId, computeRegion, modelId);
-	  const params = {};	 
-	  if (scoreThreshold) {
-		params.score_threshold = scoreThreshold;
-	  }
-	  const payload = {};
-	  payload.image = {imageBytes: base64Data};
-	  const [response] = await client.predict({
-		name: modelFullId,
-		payload: payload,
-		params: params,
-	  });
-	  console.log(`Prediction results:`);
-	  //var bill_type =1;
-	  console.log(response);	  
-	  var bill_type = await CommonModel.BillType(response); 
-	  var bill_prediction_data = await CommonModel.GetPredictionScore(response);	  
-	/*
-	  response.payload.forEach(result => {
-		console.log(result);
-		console.log(`Predicted class name: ${result.displayName}`);
-		console.log(`Predicted class score: ${result.classification.score}`);		
-	  }); */
-	  
-	  let image_name = uniqid();		
-	  var filepath = base64Img.imgSync(Orgbase64Data,storeage_path,image_name);
-	  let image_ext = filepath.split('.').pop();
-	  var act_image_name = image_name+'.'+image_ext;
-	  console.log(filepath,'filepath',image_ext)
-	  let img_path = storeage_path+'/'+act_image_name;
-	  const client_detection = new vision.ImageAnnotatorClient();
-	  const [doc_result] = await client_detection.documentTextDetection(img_path);
-	  const fullTextAnnotation = doc_result.fullTextAnnotation;	  
-	  var bill_area = doc_result.textAnnotations[0].description;	  
-	  console.log(bill_area,'bill_area');
-	  let bill_transaforms = await CommonModel.getTransformData(bill_type,bill_area);
-	  
-	  if(bill_transaforms==0){
-		  res.json({ status:202,message:'Invalid bill'});
-	  }else{
-	  
-		  //{bill_number:bill_number,net_sales:net_sales,bill_date:bill_date};
-		  var unixTimeZero = Date.parse(bill_transaforms.bill_date);
-		  var billed_format_date,billed_amount;
-		  let billed_disp_date='';
-		  if(unixTimeZero && unixTimeZero>0){
-				billed_format_date = new Date(unixTimeZero);
-				billed_disp_date = UnixTimeToDate(unixTimeZero);
+	  try {
+		  const client = new automl.PredictionServiceClient();
+		  const modelFullId = client.modelPath(projectId, computeRegion, modelId);
+		  const params = {};	 
+		  if (scoreThreshold) {
+			params.score_threshold = scoreThreshold;
 		  }
-		
-		  if(!isNaN(bill_transaforms.net_sales)){
-			  billed_amount = bill_transaforms.net_sales;
+		  const payload = {};
+		  payload.image = {imageBytes: base64Data};
+		  const [response] = await client.predict({
+			name: modelFullId,
+			payload: payload,
+			params: params,
+		  });
+		  console.log(`Prediction results:`);
+		  //var bill_type =1;
+		  console.log(response);	  
+		  var bill_type = await CommonModel.BillType(response); 
+		  var bill_prediction_data = await CommonModel.GetPredictionScore(response);	    
+		/*
+		  response.payload.forEach(result => {
+			console.log(result);
+			console.log(`Predicted class name: ${result.displayName}`);
+			console.log(`Predicted class score: ${result.classification.score}`);		
+		  }); */
+		  
+		  let image_name = uniqid();		
+		  var filepath = base64Img.imgSync(Orgbase64Data,storeage_path,image_name);
+		  let image_ext = filepath.split('.').pop();
+		  var act_image_name = image_name+'.'+image_ext;
+		  console.log(filepath,'filepath',image_ext)
+		  let img_path = storeage_path+'/'+act_image_name;
+		  const client_detection = new vision.ImageAnnotatorClient();
+		  const [doc_result] = await client_detection.documentTextDetection(img_path);
+		  const fullTextAnnotation = doc_result.fullTextAnnotation;	  
+		  var bill_area = doc_result.textAnnotations[0].description;	  
+		  console.log(bill_area,'bill_area');
+		  let bill_transaforms = await CommonModel.getTransformData(bill_type,bill_area);
+		  
+		  if(bill_transaforms==0){
+			  res.json({ status:202,message:'Invalid bill'});
 		  }else{
-			  billed_amount = 0;
-		  }
-		  bill_transaforms['prediction'] = bill_prediction_data;
-		  //var bill_date_convert = new Date(bill_transaforms.bill_date);
-		  InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,image_name:act_image_name,created_at:new Date(),verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result};
 		  
-		  if(billed_format_date){
-			  InvoiceData.bill_date = billed_format_date;
+			  //{bill_number:bill_number,net_sales:net_sales,bill_date:bill_date};
+			  var unixTimeZero = Date.parse(bill_transaforms.bill_date);
+			  var billed_format_date,billed_amount;
+			  let billed_disp_date='';
+			  if(unixTimeZero && unixTimeZero>0){
+					billed_format_date = new Date(unixTimeZero);
+					billed_disp_date = UnixTimeToDate(unixTimeZero);
+			  }
+			
+			  if(!isNaN(bill_transaforms.net_sales)){
+				  billed_amount = bill_transaforms.net_sales;
+			  }else{
+				  billed_amount = 0;
+			  }
+			  bill_transaforms['prediction'] = bill_prediction_data;
+			  //var bill_date_convert = new Date(bill_transaforms.bill_date);
+			  InvoiceData = {employee_no:parseInt(req.body.employee_no),bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,image_name:act_image_name,created_at:new Date(),verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result};
+			  
+			  if(billed_format_date){
+				  InvoiceData.bill_date = billed_format_date;
+			  }
+			  
+			  let invoice_id = await InvoiceModel.InsertInvoice(InvoiceData); 	  
+			  let prediction_data = {invoice_id:invoice_id,date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type};	  
+			  res.json({ status:200,message:'Smart verify successfully',prediction_data:prediction_data});
 		  }
-		  
-		  let invoice_id = await InvoiceModel.InsertInvoice(InvoiceData); 	  
-		  let prediction_data = {invoice_id:invoice_id,date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type};	  
-		  res.json({ status:200,message:'Smart verify successfully',prediction_data:prediction_data});
-	  }		  
+		} catch (error) {		  
+			  //console.log(error,'error--->');
+			  res.json({ status:402,message:'Server error, please try again!! '});
+		}		  
   }
   
   });
@@ -262,6 +267,7 @@ router.post('/smart-verify',[
 			if(invoice_list[0].verify_status==1){
 				res.json({ status:402,message:"Already smart verify completed"});
 			}else{
+				let old_bill_type = invoice_list[0].bill_type;
 				let invoice_image_loc = (invoice_list[0].image_name && invoice_list[0].image_name!='') ? storeage_path+'/'+invoice_list[0].image_name:'';
 				console.log(invoice_image_loc,'invoice_image_loc');
 				if (invoice_image_loc && fs.existsSync(invoice_image_loc)) {
@@ -311,12 +317,13 @@ router.post('/smart-verify',[
 						  }
 						  bill_transaforms['prediction'] = bill_prediction_data;
 						  //var bill_date_convert = new Date(bill_transaforms.bill_date);
+						  bill_transaforms['bill_type'] = old_bill_type;
 						  InvoiceData = {bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};						  
 						  if(billed_format_date){
 							  InvoiceData.bill_date = billed_format_date;
 						  }						  
 						  let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);						  
-						  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type,bill_prediction:bill_prediction_data};
+						  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:old_bill_type,bill_prediction:bill_prediction_data};
 						  if(billed_disp_date =='' || billed_amount ==0 || bill_transaforms.bill_number ==''){
 							  var message='Smart verify data missing';
 						  }else{
