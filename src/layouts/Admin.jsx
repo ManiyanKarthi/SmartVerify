@@ -72,7 +72,7 @@ class Dashboard extends React.Component {
   };
   componentDidMount() {
     if (navigator.platform.indexOf("Win") > -1) {
-      const ps = new PerfectScrollbar(this.refs.mainPanel);
+      // const ps = new PerfectScrollbar(this.refs.mainPanel);
     }
     window.addEventListener("resize", this.resizeFunction);
   }

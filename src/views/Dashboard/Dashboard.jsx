@@ -281,7 +281,7 @@ class Dashboard extends React.Component {
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center", "paddingTop":"10px"}}>
 											<Button style={{"display":(this.state.showLoaderImage ? "" : "none")}}>
-												<img src={LoaderImg} style={{"width":"25px"}}/>
+												<img src={LoaderImg} style={{"width":"25px"}} alt={"Loader"}/>
 											</Button>
 										</Grid>
 										<Grid item xs={12}>

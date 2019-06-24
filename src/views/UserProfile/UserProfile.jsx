@@ -12,12 +12,13 @@ import FetchApi from '../../api/FetchAPI';
 import Fab from '@material-ui/core/Fab';
 import BackIcon from '@material-ui/icons/ArrowLeft';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
+import LoaderImg from '../../assets/img/Loader.svg'
 
 class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, 
+		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false,
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
 		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
@@ -100,13 +101,16 @@ class UserProfile extends React.Component {
 
 		let _this = this;
 		let url = "/invoice/smart-verify/" + this.state.billID;
+		this.setState({"showLoaderImage": true});
 		new FetchApi().smartVerifyStoredBill({body: {}, url:url, success: function(data){
 			if(data.message === "Success"){
 				ToastsStore.success("Smart verified successfully");
 				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
 			}
+			_this.setState({"showLoaderImage": false});
 		}, onTimeout: function(){
 			ToastsStore.error("Smart verified failed due to timeout");
+			_this.setState({"showLoaderImage": false});
 		}});
 	}
 	
@@ -120,6 +124,7 @@ class UserProfile extends React.Component {
 			bill_type: this.state.billType
 		};
 		let url = "/invoice/manual-verify-invoice/" + this.state.billID;
+		this.setState({"showLoaderImage": true});
 		new FetchApi().manualVerify({body: paramObj, url:url, success: function(data){
 			if(data.status === 200){
 				ToastsStore.success("Manual verified successfully");
@@ -135,6 +140,7 @@ class UserProfile extends React.Component {
 				}
 				ToastsStore.error("Manual verified failed: " + msg);
 			}
+			_this.setState({"showLoaderImage": false});
 		}});
 	}
 	
@@ -142,11 +148,13 @@ class UserProfile extends React.Component {
 
 		let _this = this;
 		let url ="/invoice/reject-invoice/"+this.state.billID;
+		this.setState({"showLoaderImage": true});
 		new FetchApi().rejectBill({body: {}, url: url, success: function(data){
 			if(data.message === "Success"){
 				ToastsStore.success("Bill rejected");
 				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
 			}
+			_this.setState({"showLoaderImage": false});
 		}});
 	}
 
@@ -348,15 +356,21 @@ class UserProfile extends React.Component {
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center", "minHeight":"36px"}}>
-							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":((this.state.invoiceDataStatus == 0) ? "":"none")}}>
+							<Button variant="contained" color="primary" disabled={this.state.showLoaderImage}
+								onClick={(e)=>this.smartVerify(e)} style={{"display":((this.state.invoiceDataStatus === 0) ? "":"none")}}>
 								Smart Verify
 							</Button>&nbsp;&nbsp;
-							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
+							<Button variant="contained" color="primary" disabled={this.state.showLoaderImage}
+								onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
 								Manual Verify
 							</Button>&nbsp;&nbsp;
-							<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
+							<Button variant="contained" color="default" disabled={this.state.showLoaderImage}
+								onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
 								Reject
-							</Button>
+							</Button>&nbsp;&nbsp;
+							<button style={{"width":"100px", "height":"36px", "backgroundColor":"transparent", "border":"none", "verticalAlign":"middle"}}>
+								<img src={LoaderImg} style={{"width":"25px", "display":(this.state.showLoaderImage ? "" : "none")}} alt={"Loader"}/>
+							</button>
 						</Grid>
 					</Grid>	
 				}

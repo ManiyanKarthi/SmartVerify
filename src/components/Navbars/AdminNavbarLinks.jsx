@@ -32,7 +32,7 @@ class HeaderLinks extends React.Component {
     const { classes } = this.props;
    
     return (
-      <div>
+      <div style={{"display":"none"}}>
         <div className={classes.searchWrapper}>
           <CustomInput
             formControlProps={{
