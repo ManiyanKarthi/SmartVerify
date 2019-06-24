@@ -112,7 +112,9 @@ class Dashboard extends React.Component {
 				}
 			});
 		}
-		reader.readAsDataURL(file);
+		if(file){
+			reader.readAsDataURL(file);
+		}
 	}
 
 	serachEmployeeDetails(){

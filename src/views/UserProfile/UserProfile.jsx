@@ -13,14 +13,19 @@ import Fab from '@material-ui/core/Fab';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
 import LoaderImg from '../../assets/img/Loader.svg'
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
 class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
 		this.state = {billNo: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false, predictionData: {},
-					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10,
-					billType: 0 , billDate:'', billAmount:'', billStatus:'', automlPrediction:0, billImage:''};
+					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10, autoMLStatus: {},
+					billType: 0 , billDate:'', billStatus:'', automlPrediction:0, billImage:''};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
 		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
@@ -78,7 +83,9 @@ class UserProfile extends React.Component {
 				imagePreviewUrl: reader.result
 			});
 		}
-		reader.readAsDataURL(file)
+		if(file){
+			reader.readAsDataURL(file);
+		}
 	}
 
 	serachEmployeeDetails(){
@@ -99,14 +106,14 @@ class UserProfile extends React.Component {
 
 		let _this = this;
 		let url = "/invoice/smart-verify/" + this.state.billID;
-		this.setState({"showLoaderImage": true});
+		this.setState({"showLoaderImage": true, "autoMLStatus":{}});
 		new FetchApi().smartVerifyStoredBill({body: {}, url:url, success: function(data){
 			if(data.status === 200){
-				ToastsStore.success("Smart verified successfully: " + data.msg);
-				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
+				_this.onDetailedRowClick(_this.billDetailedClickedData);
+				_this.setState({"autoMLStatus":{"showMessage": true, "state":"success", "message": data.message}});
 			}
 			else {
-				ToastsStore.error("Smart verified failed: " + data.msg);
+				_this.setState({"autoMLStatus":{"showMessage": true, "state":"error", "message": data.message}});
 			}
 			_this.setState({"showLoaderImage": false});
 		}, onTimeout: function(){
@@ -125,11 +132,11 @@ class UserProfile extends React.Component {
 			bill_type: this.state.billType
 		};
 		let url = "/invoice/manual-verify-invoice/" + this.state.billID;
-		this.setState({"showLoaderImage": true});
+		this.setState({"showLoaderImage": true, "autoMLStatus":{}});
 		new FetchApi().manualVerify({body: paramObj, url:url, success: function(data){
 			if(data.status === 200){
 				ToastsStore.success("Manual verified successfully");
-				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
+				_this.onDetailedRowClick(_this.billDetailedClickedData);
 			}
 			else {
 				var msg = "";
@@ -153,7 +160,7 @@ class UserProfile extends React.Component {
 		new FetchApi().rejectBill({body: {}, url: url, success: function(data){
 			if(data.message === "Success"){
 				ToastsStore.success("Bill rejected");
-				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
+				_this.onDetailedRowClick(_this.billDetailedClickedData);
 			}
 			_this.setState({"showLoaderImage": false});
 		}});
@@ -179,16 +186,17 @@ class UserProfile extends React.Component {
 				"tableDetailedData": res.invoice_list, "showSearchContainer": true}, 
 				function () {
 					if(_this.state.tableDetailedData && _this.state.tableDetailedData.length > 0){
-						_this.onDetailedRowClick({}, _this.state.tableDetailedData[0]);
+						_this.onDetailedRowClick(_this.state.tableDetailedData[0]);
 					}
 				});
 		}});
 	}
 
-	onDetailedRowClick(event, data){
+	onDetailedRowClick(data){
 		let _this = this;
 		let url = "/invoice/get-invoice-details/"+data["_id"];
 		this.billDetailedClickedData = data;
+		this.setState({"autoMLStatus":{}});
 		new FetchApi().getInvoiceDetails({body: {}, url: url, success: function(res){
 			let invoiceData = res.invoice_list[0];
 			let predictionData = {};
@@ -270,7 +278,7 @@ class UserProfile extends React.Component {
 						<Grid container style={{"textAlign":"center"}} direction={"row"}>
 							<Grid item> 
 								<Fab aria-label="Add" onClick={()=>{this.setState({"homePageShowFlag":true})}} >
-									<BackIcon  style={{fontSize: "32px"}}/>
+									<BackIcon color={"transparent"} style={{fontSize: "32px"}}/>
 								</Fab>
 							</Grid>
 							<Grid item style={{"padding":"18px 30px", "fontSize":"20px"}}>
@@ -281,21 +289,39 @@ class UserProfile extends React.Component {
 							</Grid>
 						</Grid>
 						<Grid container spacing={2} style={{"padding":"20px"}}>
-							<Grid item xs={4}>
-								<Grid item xs={12} className={"gridSpaceContainer"}>
-									<MaterialTable title="" search = {false}
-										columns={this.state.tableDetailedColumns}
-										data={this.state.tableDetailedData}
-										onRowClick={this.onDetailedRowClick} />
+							<Grid item xs={4} className={"gridSpaceContainer"}>
+								<Grid item xs={12}>
+									<Table>
+										<TableHead>
+											<TableRow>
+												<TableCell align="center">Bill No</TableCell>
+												<TableCell align="center">Date</TableCell>
+												<TableCell align="center">Amount</TableCell>
+												<TableCell align="center">Status</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{
+												this.state.tableDetailedData.map(row => (
+												<TableRow key={row["_id"]} onClick={() => {this.onDetailedRowClick(row)}}
+													style={{"cursor":"pointer", "backgroundColor":(this.state.billID === row["_id"] ? "#e8e8e8" : "")}}>
+													<TableCell align="right">{row.employee_no}</TableCell>
+													<TableCell align="right">{row.bill_date}</TableCell>
+													<TableCell align="right">{row.bill_amount}</TableCell>
+													<TableCell align="right">{row.bill_status}</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
 								</Grid>
 							</Grid>
-							<Grid container item xs={4}>
-								<Grid item xs={12} className={"gridSpaceContainer"}>
+							<Grid container item xs={4} className={"gridSpaceContainer"}>
+								<Grid item xs={12}>
 									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">Bill Type:</label>
 										</Grid>
-										<Grid item xs={4}>
+										<Grid item xs={5}>
 											<Select style={{"padding":"8px"}} disabled={disableEdit}
 												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
 												{
@@ -318,10 +344,10 @@ class UserProfile extends React.Component {
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">Bill No:</label>
 										</Grid>
-										<Grid item xs={4}>
+										<Grid item xs={5}>
 											<TextField type="number" value={this.state.billNo} disabled={disableEdit}
 												onChange={(e) => {this.setState({"billNo": e.currentTarget.value})}}/>
 											{
@@ -334,10 +360,10 @@ class UserProfile extends React.Component {
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">Date:</label>
 										</Grid>
-										<Grid item xs={4}>
+										<Grid item xs={5}>
 											<TextField value={this.state.billDate} type={"date"} disabled={disableEdit}
 												onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 											{
@@ -350,10 +376,10 @@ class UserProfile extends React.Component {
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">Amount:</label>
 										</Grid>
-										<Grid item xs={4}>
+										<Grid item xs={5}>
 											<TextField type="number" value={this.state.billAmount} disabled={disableEdit}
 												onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
 											{
@@ -366,36 +392,42 @@ class UserProfile extends React.Component {
 										</Grid>
 									</Grid>
 									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">Status:</label>
 										</Grid>
-										<Grid item xs={4}>
+										<Grid item xs={5}>
 											<label className="popupLabelValue">{this.state.billStatus}</label>
 										</Grid>
 									</Grid> 
 									<Grid container className={"gridSpaceForm"} style={{"marginTop":"15px"}}>
-										<Grid item xs={8}>
+										<Grid item xs={7}>
 											<label className="popupLabelText">AutoML Prediction:</label>
 										</Grid>
-										<Grid item xs={4}>
-											<TextField type="number" value={this.state.automlPrediction}  disabled={true} 
-												onChange={(e) => {this.setState({"automlPrediction": e.currentTarget.value})}}/>
+										<Grid item xs={5}>
+											<label>
+												{this.state.automlPrediction}
+											</label>&nbsp;
 											{
 												this.state.predictionData.billType ? 
-												<div>
-													{this.state.predictionData.billType}
-												</div>
+												<label>&nbsp;-&nbsp;
+													({this.state.predictionData.billType})
+												</label>
 												: null
 											}
 										</Grid>
 									</Grid>
+									<Grid container className={"gridSpaceForm"} style={{"marginTop":"25px", "textAlign": "center", "display":(this.state.autoMLStatus.showMessage ? "inline-block" : "none")}}>
+										<span style={{"color":(this.state.autoMLStatus.state === "success" ? "green" : "red")}}>
+											{this.state.autoMLStatus.message}
+										</span>
+									</Grid>
 								</Grid>
 							</Grid>
-							<Grid item xs={4}>
-								<Grid item xs={12} className={"gridSpaceContainer"} style={{"textAlign":"center", "position":"relative"}}>
+							<Grid item xs={4} className={"gridSpaceContainer"}>
+								<Grid item xs={12} style={{"textAlign":"center", "position":"relative"}}>
 									<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
 										className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
-									<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"400px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
+									<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"-webkit-fill-available"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
 										src={this.state.billImage} alt="Bill"/>
 								</Grid>
 							</Grid>
