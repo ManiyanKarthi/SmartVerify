@@ -31,6 +31,18 @@
     font-size: 18px;
 }
 
+.overlayImageView {
+    /* display: block !important;*/
+    position: absolute;
+    right: 100%;
+    border: 1px solid black;
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    background-image: url('http://ginger-mum.com/wp-content/uploads/2015/10/3633-1269758855-0da5042c33400a811a5d766be4579cb8.jpg');
+    background-repeat: no-repeat;
+}
+
 .gridSpaceContainer{
     background-color:#e8e8e880;
     height: 100%;

@@ -17,8 +17,8 @@ class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, zoomImageFlag: false,
-					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true};
+		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, 
+					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
 		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billData = {billType:'', billDate:'', billAmount:'', billStatus:'', automlPrediction:'', manualPrediction:'', billImage:''};
@@ -34,7 +34,6 @@ class UserProfile extends React.Component {
 		this.showHomePage = this.showHomePage.bind(this);
 		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
-		this.zoomImage = this.zoomImage.bind(this);
 		this.smartVerify = this.smartVerify.bind(this);
 		this.manualVerify = this.manualVerify.bind(this);
 		this.rejectForm = this.rejectForm.bind(this);
@@ -99,29 +98,41 @@ class UserProfile extends React.Component {
 	smartVerify(){
 
 		let _this = this;
-		let paramObj = { 
-			bill_id:this.state.billID
-		};
-
-		new FetchApi().smartVerifyStoredBill({body: paramObj, success: function(data){
+		let url = "/invoice/smart-verify/" + this.state.billID;
+		new FetchApi().smartVerifyStoredBill({body: {}, url:url, success: function(data){
 			if(data.message === "Success"){
 				ToastsStore.success("Smart verified successfully");
-				_this.onRowClick(_this.billOneClickData);
+				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
 			}
+		}, onTimeout: function(){
+			ToastsStore.error("Smart verified failed due to timeout");
 		}});
 	}
 	
 	manualVerify(){
 
 		let _this = this;
-		let paramObj = { 
-			bill_id:this.state.billID
+		let paramObj = {
+			bill_no: this.state.billNo,
+			bill_date: this.state.billDate,
+			bill_amount: this.state.billAmount,
+			bill_type: this.state.billType
 		};
-
-		new FetchApi().manualVerify({body: paramObj, success: function(data){
-			if(data.message === "Success"){
+		let url = "/invoice/manual-verify-invoice/" + this.state.billID;
+		new FetchApi().manualVerify({body: paramObj, url:url, success: function(data){
+			if(data.status === 200){
 				ToastsStore.success("Manual verified successfully");
-				_this.onRowClick(_this.billOneClickData);
+				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
+			}
+			else {
+				var msg = "";
+				var errors = data.errors;
+				if(errors && errors.length > 0){
+					for(var i=0;i<errors.length;i++){
+						msg = msg + "" + errors[i].msg + "(" + errors[i].param + ")" + (i >= errors.length - 1 ? "" : ",") + " ";
+					}
+				}
+				ToastsStore.error("Manual verified failed: " + msg);
 			}
 		}});
 	}
@@ -129,14 +140,11 @@ class UserProfile extends React.Component {
 	rejectForm(){
 
 		let _this = this;
-		let paramObj = { 
-			bill_id:this.state.billID
-		};
-
-		new FetchApi().rejectBill({body: paramObj, success: function(data){
+		let url ="/invoice/reject-invoice/"+this.state.billID;
+		new FetchApi().rejectBill({body: {}, url: url, success: function(data){
 			if(data.message === "Success"){
 				ToastsStore.success("Bill rejected");
-				_this.onRowClick(_this.billOneClickData);
+				_this.onDetailedRowClick({}, _this.billDetailedClickedData);
 			}
 		}});
 	}
@@ -155,7 +163,6 @@ class UserProfile extends React.Component {
 
 	onRowClick(event, data){
 		let _this = this;
-		this.billOneClickData = data;
 		let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
 		new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
 			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, "clickedBillMonth": data.bill_month,
@@ -171,22 +178,29 @@ class UserProfile extends React.Component {
 	onDetailedRowClick(event, data){
 		let _this = this;
 		let url = "/invoice/get-invoice-details/"+data["_id"];
+		this.billDetailedClickedData = data;
 		new FetchApi().getInvoiceDetails({body: {}, url: url, success: function(res){
 			let invoiceData = res.invoice_list[0];
-			let hideSmartVerify = (invoiceData.verify_status > 0) ? true : false;
 			_this.setState({"enableDetails":true, billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.bill_status, 
-			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, hideSmartVerify: hideSmartVerify, billID: invoiceData["_id"],
-			billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}, function(){
+			automlPrediction: invoiceData.prediction, manualPrediction: invoiceData.manualprediction, invoiceDataStatus: invoiceData.verify_status, billID: invoiceData["_id"], 
+			billNo: invoiceData.bill_no, billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}, function(){
 				_this.forceUpdate();
 			});
 		}});
 	}
 
-	zoomImage(){
-		let _this = this;
-		this.setState({"zoomImageFlag":true}, function () {
-			_this.forceUpdate();
-		})
+	zoomInImage(event){
+		var element = document.getElementById("overlay");
+		element.style.display = "none"; // "inline-block";
+		var img = document.getElementById("overlayOriginalImage");
+		var posX = event.nativeEvent.offsetX ? (event.nativeEvent.offsetX) : event.nativeEvent.pageX - img.offsetLeft;
+		var posY = event.nativeEvent.offsetY ? (event.nativeEvent.offsetY) : event.nativeEvent.pageY - img.offsetTop;
+		element.style.backgroundPosition = (-posX * 4) + "px " + (-posY * 4) + "px";
+	}
+
+	zoomOutImage() {
+		var element = document.getElementById("overlay");
+		element.style.display = "none";
 	}
 
 	render() {
@@ -318,19 +332,22 @@ class UserProfile extends React.Component {
 								</Grid>
 							</Grid>
 							<Grid item xs={4}>
-								<Grid item xs={12} className={"gridSpaceContainer"} style={{"textAlign":"center"}}>
-									<img style={{"maxWidth":"100%", "maxHeight":"400px"}} src={this.state.billImage} alt="Bill"/>
+								<Grid item xs={12} className={"gridSpaceContainer"} style={{"textAlign":"center", "position":"relative"}}>
+									<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
+										className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
+									<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"400px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
+										src={this.state.billImage} alt="Bill"/>
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid item xs={12} style={{"textAlign":"center"}}>
-							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":(this.state.hideSmartVerify ? "none":"")}}>
+						<Grid item xs={12} style={{"textAlign":"center", "minHeight":"36px"}}>
+							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":(this.state.invoiceDataStatus > 0 ? "none":"")}}>
 								Smart Verify
 							</Button>&nbsp;&nbsp;
-							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} >
+							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 1 ? "none":"")}}>
 								Manual Verify
 							</Button>&nbsp;&nbsp;
-							<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} >
+							<Button variant="contained" color="default" onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
 								Reject
 							</Button>
 						</Grid>

@@ -84,20 +84,20 @@ class FetchApi {
   }
 
   smartVerifyStoredBill(props) {
-    props.url = this.baseurl + "/invoice/smart-verify";
-    props.method = "POST";
+    props.url = this.baseurl + props.url;
+    props.method = "GET";
     fetchData(props);
   }
 
   manualVerify(props){
-    props.url = this.baseurl + "/invoice/smart-verify";
+    props.url = this.baseurl + props.url;
     props.method = "POST";
     fetchData(props);
   }
 
   rejectBill(props){
-    props.url = this.baseurl + "/invoice/smart-verify";
-    props.method = "POST";
+    props.url = this.baseurl + props.url;
+    props.method = "GET";
     fetchData(props);
   }
 }
