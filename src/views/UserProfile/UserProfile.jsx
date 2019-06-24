@@ -18,9 +18,9 @@ class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNO: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false, predictionData: {},
+		this.state = {billNo: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false, predictionData: {},
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10,
-					billType: 0 , billDate:'', billAmount:'', billStatus:'', automlPrediction:0, manualPrediction:0, billImage:''};
+					billType: 0 , billDate:'', billAmount:'', billStatus:'', automlPrediction:0, billImage:''};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"}];
 		this.state.tableDetailedColumns = [{"title":"Bill No","field":"employee_no","type":"numeric"},{"title":"Date","field":"bill_date","type":"date"},{"title":"Amount","field":"bill_amount","type":"numeric"},{"title":"status","field":"bill_status","type":"numeric"}];
 		this.state.billTypeList = [ "Others", "Fuel", "Toll"];
@@ -193,6 +193,7 @@ class UserProfile extends React.Component {
 			let invoiceData = res.invoice_list[0];
 			let predictionData = {};
 			if(invoiceData.bill_transaforms){
+				predictionData.billNo = invoiceData.bill_transaforms.bill_number;
 				predictionData.billDate = invoiceData.bill_transaforms.bill_date;
 				predictionData.billAmount = invoiceData.bill_transaforms.net_sales;
 				if(typeof invoiceData.bill_transaforms.bill_type === "number"){
@@ -200,7 +201,7 @@ class UserProfile extends React.Component {
 				}
 			}
 			_this.setState({"enableDetails":true, billType: invoiceData.bill_type, billDate: invoiceData.bill_date, billAmount: invoiceData.bill_amount, billStatus: invoiceData.bill_status, 
-			automlPrediction: invoiceData.automl_prediction_percentage, manualPrediction: invoiceData.automl_prediction_percentage, invoiceDataStatus: invoiceData.verify_status, billID: invoiceData["_id"], 
+			automlPrediction: invoiceData.automl_prediction_percentage, invoiceDataStatus: invoiceData.verify_status, billID: invoiceData["_id"], 
 			predictionData: predictionData, billNo: invoiceData.bill_no, billImage: new FetchApi().appendURL("/"+invoiceData.invoice_image_loc)}, function(){
 				_this.forceUpdate();
 			});
@@ -306,11 +307,27 @@ class UserProfile extends React.Component {
 														);
 													})
 												}
-											</Select>
+											</Select><br />
 											{
 												this.state.predictionData.billType ? 
 												<label className={"predictionDataLabel"}>
 													({this.state.predictionData.billType})
+												</label>
+												: null
+											}
+										</Grid>
+									</Grid>
+									<Grid container className={"gridSpaceForm"}>
+										<Grid item xs={8}>
+											<label className="popupLabelText">Bill No:</label>
+										</Grid>
+										<Grid item xs={4}>
+											<TextField type="number" value={this.state.billNo} disabled={disableEdit}
+												onChange={(e) => {this.setState({"billNo": e.currentTarget.value})}}/>
+											{
+												this.state.predictionData.billNo ? 
+												<label className={"predictionDataLabel"}>
+													({this.state.predictionData.billNo})
 												</label>
 												: null
 											}
@@ -363,15 +380,13 @@ class UserProfile extends React.Component {
 										<Grid item xs={4}>
 											<TextField type="number" value={this.state.automlPrediction}  disabled={true} 
 												onChange={(e) => {this.setState({"automlPrediction": e.currentTarget.value})}}/>
-										</Grid>
-									</Grid>
-									<Grid container className={"gridSpaceForm"}>
-										<Grid item xs={8}>
-											<label className="popupLabelText">Vision Text Prediction:</label>
-										</Grid>
-										<Grid item xs={4}>
-											<TextField type="number" value={this.state.manualPrediction} disabled={disableEdit}
-												onChange={(e) => {this.setState({"manualPrediction": e.currentTarget.value})}}/>
+											{
+												this.state.predictionData.billType ? 
+												<div>
+													{this.state.predictionData.billType}
+												</div>
+												: null
+											}
 										</Grid>
 									</Grid>
 								</Grid>
