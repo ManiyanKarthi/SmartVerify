@@ -348,7 +348,7 @@ class UserProfile extends React.Component {
 							</Grid>
 						</Grid>
 						<Grid item xs={12} style={{"textAlign":"center", "minHeight":"36px"}}>
-							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":((this.state.invoiceDataStatus == 0 || this.state.invoiceDataStatus == 2) ? "":"none")}}>
+							<Button variant="contained" color="primary" onClick={(e)=>this.smartVerify(e)} style={{"display":((this.state.invoiceDataStatus == 0) ? "":"none")}}>
 								Smart Verify
 							</Button>&nbsp;&nbsp;
 							<Button variant="contained" color="primary" onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
