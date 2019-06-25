@@ -305,7 +305,7 @@ class UserProfile extends React.Component {
 					</Grid>
 					<Grid container spacing={2} style={{"padding":"20px"}}>
 						<Grid item xs={4} className={"gridSpaceContainer"}>
-							<Grid item xs={12} style={{"height":"100%", "maxHeight":"650px"}}>
+							<Grid item xs={12} style={{"height":"100%"}}>
 								<Table>
 									<TableHead>
 										<TableRow>
@@ -451,7 +451,7 @@ class UserProfile extends React.Component {
 							<Grid item xs={12} style={{"textAlign":"center", "position":"relative", "height":"100%", "overflow":"visible"}}>
 								<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
 									className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
-								<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"-webkit-fill-available"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
+								<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"650px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
 									src={this.state.billImage} alt="Bill"/>
 							</Grid>
 						</Grid>
