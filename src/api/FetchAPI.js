@@ -17,9 +17,19 @@ function fetchData(props) {
 
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.response) {
-      let json = JSON.parse(xhr.response);
-      props.success(json);
+    if (xhr.readyState === 4) {
+      if(xhr.status === 200){
+        let json = {};
+        if(xhr.response){
+          json= JSON.parse(xhr.response);
+        }
+        props.success(json);
+      }
+      else {
+        if(props.error){
+          props.error(xhr.response);
+        }
+      }
     }
   };
   xhr.open(props.method, props.url, true);

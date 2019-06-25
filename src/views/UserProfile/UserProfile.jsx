@@ -118,7 +118,10 @@ class UserProfile extends React.Component {
 				_this.setState({"autoMLStatus":{"showMessage": true, "state":"error", "message": data.message}});
 			}
 			_this.setState({"showLoaderImage": false});
-		}, onTimeout: function(){
+		}, error: function(message){
+			_this.setState({"autoMLStatus":{"showMessage": true, "state":"error", "message": "Smart verify failed: " + message}});
+		},
+		onTimeout: function(){
 			ToastsStore.error("Smart verified failed due to timeout");
 			_this.setState({"showLoaderImage": false});
 		}});
@@ -127,7 +130,7 @@ class UserProfile extends React.Component {
 	updateDetailTable(data){
 		let dt = this.state.tableDetailedData;
 		for(var i=0;i<dt.length;i++){
-			if(dt[i]["_id"] == data["_id"]){
+			if(dt[i]["_id"] === data["_id"]){
 				dt[i] = data;
 			}
 		}
