@@ -195,7 +195,7 @@ class UserProfile extends React.Component {
 
 	onRowClick(event, data){
 		let _this = this;
-		let paramObj = {emp_id: data.employee_no, bill_month: data.bill_month};
+		let paramObj = {emp_id: data.employee_no, bill_month: this.state.billMonth};
 		new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
 			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, "clickedBillMonth": data.bill_month,
 				"tableDetailedData": res.invoice_list, "showSearchContainer": true}, 
