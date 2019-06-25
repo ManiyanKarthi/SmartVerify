@@ -45,7 +45,7 @@ class UserProfile extends React.Component {
 		this.rejectForm = this.rejectForm.bind(this);
 
 		//verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
-		this.getInvoices();
+		this.serachEmployeeDetails();
 	}
 
 	generateBillMonth(){
@@ -91,7 +91,7 @@ class UserProfile extends React.Component {
 	}
 
 	serachEmployeeDetails(){
-		let data = {emp_id: this.state.employeeID, bill_month: this.state.billMonth};
+		let data = {emp_id: this.state.employeeID, month_year: this.state.billMonth};
 		this.getInvoices(data);
 	}
 
@@ -195,7 +195,7 @@ class UserProfile extends React.Component {
 
 	onRowClick(event, data){
 		let _this = this;
-		let paramObj = {emp_id: data.employee_no, bill_month: this.state.billMonth};
+		let paramObj = {emp_id: data.employee_no, month_year: this.state.billMonth};
 		new FetchApi().getEmployeeForVerificationInvoiceDetails({body: paramObj, success: function(res){
 			_this.setState({"homePageShowFlag": false, "clickedEmployeeID": data.employee_no, "clickedBillMonth": data.bill_month,
 				"tableDetailedData": res.invoice_list, "showSearchContainer": true}, 
