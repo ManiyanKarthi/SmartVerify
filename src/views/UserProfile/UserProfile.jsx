@@ -331,7 +331,7 @@ class UserProfile extends React.Component {
 							</Grid>
 						</Grid>
 						<Grid container item xs={4} className={"gridSpaceContainer"}>
-							<Grid item xs={12}>
+							<Grid item xs={12} style={{"height":"100%"}}>
 								<Grid container className={"gridSpaceForm"}>
 									<Grid item xs={7}>
 										<label className="popupLabelText">Bill Type:</label>
