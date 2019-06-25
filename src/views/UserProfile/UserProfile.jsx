@@ -43,6 +43,10 @@ class UserProfile extends React.Component {
 		this.smartVerify = this.smartVerify.bind(this);
 		this.manualVerify = this.manualVerify.bind(this);
 		this.rejectForm = this.rejectForm.bind(this);
+		this.zoomInImage = this.zoomInImage.bind(this);
+		this.zoomOutImage = this.zoomOutImage.bind(this);
+
+		this.zoomTimeout = undefined;
 
 		//verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
 		this.serachEmployeeDetails();
@@ -236,7 +240,10 @@ class UserProfile extends React.Component {
 
 	zoomInImage(event){
 		var element = document.getElementById("overlay");
-		element.style.display = "inline-block";
+		clearTimeout(this.zoomTimeout);
+		this.zoomTimeout = setTimeout(function(){
+			element.style.display = "inline-block";
+		}, 2000);
 		var img = document.getElementById("overlayOriginalImage");
 		var posX = event.nativeEvent.offsetX ? (event.nativeEvent.offsetX) : event.nativeEvent.pageX - img.offsetLeft;
 		var posY = event.nativeEvent.offsetY ? (event.nativeEvent.offsetY) : event.nativeEvent.pageY - img.offsetTop;
@@ -244,6 +251,7 @@ class UserProfile extends React.Component {
 	}
 
 	zoomOutImage() {
+		clearTimeout(this.zoomTimeout);
 		var element = document.getElementById("overlay");
 		element.style.display = "none";
 	}
@@ -425,7 +433,7 @@ class UserProfile extends React.Component {
 								</Grid> 
 								<Grid container className={"gridSpaceForm"} style={{"marginTop":"15px"}}>
 									<Grid item xs={7}>
-										<label className="popupLabelText">AutoML Prediction:</label>
+										<label className="popupLabelText">Smart Prediction:</label>
 									</Grid>
 									<Grid item xs={5}>
 										<label>
@@ -451,7 +459,7 @@ class UserProfile extends React.Component {
 							<Grid item xs={12} style={{"textAlign":"center", "position":"relative", "height":"100%", "overflow":"visible"}}>
 								<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
 									className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
-								<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"650px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
+								<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"500px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
 									src={this.state.billImage} alt="Bill"/>
 							</Grid>
 						</Grid>
