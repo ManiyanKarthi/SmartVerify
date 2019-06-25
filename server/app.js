@@ -58,6 +58,13 @@ db.connect(url,dbName,function(err) {
   }
 });
 
+var a='2018-07-26';var b='2018-07-26';
+if(a==b){
+  console.log(a,'truueee');
+}else{
+  console.log(a,'falsee');
+}
+
 /*
 const url = 'mongodb://localhost:27017/smart_vision';
 // Database Name

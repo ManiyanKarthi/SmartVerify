@@ -241,6 +241,61 @@ exports.getEmployeeInvoiceDetails = (invoice_id) => {
 					resolve(invoice_result);
 				}
 		});
-	});
+	});	
+}
+
+exports.getLocationCount = () => {
 	
+	return new Promise( (resolve, reject) => {
+		db.get().collection('location').aggregate([			
+			{$project : {				
+				closed:{$cond: { if: { $eq: [ "$load_status","Closed"] }, then: 1, else: 0 }},
+				planned:{$cond: { if: { $eq: [ "$load_status","Planned"] }, then: 1, else: 0 }},
+				open:{$cond: { if: { $eq: [ "$load_status","Open"] }, then: 1, else: 0 }},
+				active:{$cond: { if: { $eq: [ "$load_status","Active"] }, then: 1, else: 0 }},
+				removed:{$cond: { if: { $eq: [ "$load_status","Removed"] }, then: 1, else: 0 }},				     
+			}}, 
+			{$group : { 
+					_id :null,				 
+				  closed:{$sum:'$closed'},
+				  planned:{$sum:'$planned'},
+				  open:{$sum:'$open'},
+				  active:{$sum:'$active'},
+				  removed:{$sum:'$removed'},
+				  total_count: { $sum: 1 }
+			}}
+		]).toArray(function(err, invoice_result) 	{							
+				if(err){
+					console.log(err,'err---'); //reject(err);
+					resolve([]);
+				}else{
+					console.log(invoice_result,'res---->');
+					resolve(invoice_result);
+				}
+		});
+	});
+}
+
+exports.getEmployeeLogInvoiceDetails = (invoice_id) => {
+	
+	var match_cond = { _id:ObjectID(invoice_id) };	
+	
+	return new Promise( (resolve, reject) => {
+		db.get().collection('invoice').aggregate([
+			{$match	: match_cond },
+			{$project : {				
+				bill_transaforms:"$bill_transaforms",
+				automl_prediction:"$automl_prediction",
+				vision_response:"$vision_response"								             
+			}}
+		]).toArray(function(err, invoice_result) 	{							
+				if(err){
+					console.log(err,'err---'); //reject(err);
+					resolve([]);
+				}else{
+					//console.log(res,'res---->');
+					resolve(invoice_result);
+				}
+		});
+	});	
 }

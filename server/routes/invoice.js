@@ -23,7 +23,7 @@ const storeage_path = './server/public/images/invoice';
 const storeage_url = 'images/invoice/';
 
 /* GET users listing. */
-router.get('/', (req, res, next) => {	
+router.get('/', async(req, res, next) => {
 	res.send('respond with a resource');
 });
 
@@ -31,7 +31,7 @@ router.post('/add', [
   check('employee_no').isLength({ min: 3,max:10}),  
   check('bill_no').isLength({ min: 3,max:20 }),  
   check('bill_date').isLength({ min: 4,max:30 }),
-  check('bill_amount').toInt().isLength({ min: 1,max:10 }),
+  check('bill_amount').toFloat().isLength({ min: 1,max:10 }),
   check('bill_image').isLength({ min:10}),
   check('bill_type').isLength({ min:1})
 ], (req, res) => {	
@@ -268,69 +268,93 @@ router.post('/smart-verify',[
 				res.json({ status:402,message:"Already smart verify completed"});
 			}else{
 				let old_bill_type = invoice_list[0].bill_type;
+				let old_bill_amount = invoice_list[0].bill_amount;
+				let old_bill_no = invoice_list[0].bill_no;
+				let old_bill_date = invoice_list[0].bill_date;
+				let old_bill_info = {bill_no:old_bill_no,bill_amount:old_bill_amount,bill_date:old_bill_date};
+				
 				let invoice_image_loc = (invoice_list[0].image_name && invoice_list[0].image_name!='') ? storeage_path+'/'+invoice_list[0].image_name:'';
 				console.log(invoice_image_loc,'invoice_image_loc');
 				if (invoice_image_loc && fs.existsSync(invoice_image_loc)) {
 					let filePath_Loc = storeage_path+'/'+invoice_list[0].image_name;
 					const base64Data = fs.readFileSync(filePath_Loc, 'base64');
-					const client = new automl.PredictionServiceClient();
-					  const modelFullId = client.modelPath(projectId, computeRegion, modelId);
-					  const params = {};	 
-					  if (scoreThreshold) {
-						params.score_threshold = scoreThreshold;
-					  }
-					  const payload = {};
-					  payload.image = {imageBytes: base64Data};
-					  const [response] = await client.predict({
-						name: modelFullId,
-						payload: payload,
-						params: params,
-					  });
-					  console.log(`Prediction results:`);
-					  //var bill_type =1;
-					  console.log(response);	  
-					  var bill_type = await CommonModel.BillType(response); 
-					  var bill_prediction_data = await CommonModel.GetPredictionScore(response);
-					  //console.log(bill_type,'bill_type--->');
-					  const client_detection = new vision.ImageAnnotatorClient();
-					  const [doc_result] = await client_detection.documentTextDetection(filePath_Loc);
-					  const fullTextAnnotation = doc_result.fullTextAnnotation;	  
-					  var bill_area = doc_result.textAnnotations[0].description;	  
-					  console.log(bill_area,'bill_area');
-					  let bill_transaforms = await CommonModel.getTransformData(bill_type,bill_area);
-					  
-					  if(bill_transaforms==0){
-						  res.json({ status:202,message:'Invalid bill'});
-					  }else{					  
-						  //{bill_number:bill_number,net_sales:net_sales,bill_date:bill_date};
-						  var unixTimeZero = Date.parse(bill_transaforms.bill_date);
-						  var billed_format_date,billed_amount;
-						  let billed_disp_date='';
-						  if(unixTimeZero && unixTimeZero>0){
-								billed_format_date = new Date(unixTimeZero);
-								billed_disp_date = UnixTimeToDate(unixTimeZero);
-						  }						
-						  if(!isNaN(bill_transaforms.net_sales)){
-							  billed_amount = bill_transaforms.net_sales;
-						  }else{
-							  billed_amount = 0;
+					try {
+						  const client = new automl.PredictionServiceClient();
+						  const modelFullId = client.modelPath(projectId, computeRegion, modelId);
+						  const params = {};	 
+						  if (scoreThreshold) {
+							params.score_threshold = scoreThreshold;
 						  }
-						  bill_transaforms['prediction'] = bill_prediction_data;
-						  //var bill_date_convert = new Date(bill_transaforms.bill_date);
-						  bill_transaforms['bill_type'] = old_bill_type;
-						  InvoiceData = {bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};						  
-						  if(billed_format_date){
-							  InvoiceData.bill_date = billed_format_date;
-						  }						  
-						  let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);						  
-						  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:old_bill_type,bill_prediction:bill_prediction_data};
-						  if(billed_disp_date =='' || billed_amount ==0 || bill_transaforms.bill_number ==''){
-							  var message='Smart verify data missing';
+						  const payload = {};
+						  payload.image = {imageBytes: base64Data};
+						  const [response] = await client.predict({
+							name: modelFullId,
+							payload: payload,
+							params: params,
+						  });
+						  console.log(`Prediction results:`);
+						  //var bill_type =1;
+						  console.log(response);	  
+						  var bill_type = await CommonModel.BillType(response); 
+						  var bill_prediction_data = await CommonModel.GetPredictionScore(response);
+						  //console.log(bill_type,'bill_type--->');
+						  const client_detection = new vision.ImageAnnotatorClient();
+						  const [doc_result] = await client_detection.documentTextDetection(filePath_Loc);
+						  const fullTextAnnotation = doc_result.fullTextAnnotation;	  
+						  var bill_area = doc_result.textAnnotations[0].description;	  
+						  console.log(bill_area,'bill_area');			  
+						  
+						  if(old_bill_type==bill_type){
+							  
+							  let bill_transaforms = await CommonModel.getTransformData(bill_type,bill_area);						  
+							  if(bill_transaforms==0){
+								  res.json({ status:202,message:'Invalid bill'});
+							  }else{					  
+								  //{bill_number:bill_number,net_sales:net_sales,bill_date:bill_date};
+								  var unixTimeZero = Date.parse(bill_transaforms.bill_date);
+								  var billed_format_date,billed_amount;
+								  let billed_disp_date='';
+								  if(unixTimeZero && unixTimeZero>0){
+										billed_format_date = new Date(unixTimeZero);
+										billed_disp_date = UnixTimeToDate(unixTimeZero);
+								  }						
+								  if(!isNaN(bill_transaforms.net_sales)){
+									  billed_amount = bill_transaforms.net_sales;
+								  }else{
+									  billed_amount = 0;
+								  }
+								  bill_transaforms['prediction'] = bill_prediction_data;
+								  //var bill_date_convert = new Date(bill_transaforms.bill_date);
+								  bill_transaforms['bill_type'] = old_bill_type;
+								  //InvoiceData = {bill_type:bill_type,bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};
+								  InvoiceData = {verify_status:1,bill_transaforms:bill_transaforms,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};
+								  /*if(billed_format_date){
+									  InvoiceData.bill_date = billed_format_date;
+								  }*/
+								  
+								  let bill_info = {bill_no:bill_transaforms.bill_number,bill_amount:billed_amount,bill_date:billed_disp_date};
+								  let bill_matching = await CommonModel.CheckBillInformation(old_bill_info,bill_info);
+								  
+								  if(bill_matching==1){
+									  var message = 'Smart verify successfully';
+									  var status = 200;  
+								  }else{
+									  InvoiceData.verify_status = 2;
+									  var message = bill_matching.message;
+									  var status = 402;								  
+								  }							  
+								  let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);						  
+								  let prediction_res = {date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:old_bill_type,bill_prediction:bill_prediction_data};
+								  
+								  res.json({ status:status,message:message,prediction_response:prediction_res});						  
+							  }
 						  }else{
-							  var message='Smart verify successfully';
+								res.json({ status:402,message:"Invoice file not found"});
 						  }
-						  res.json({ status:200,message:message,prediction_response:prediction_res});						  
-					  }					
+				 	} catch (error) {		  
+						  //console.log(error,'error--->');
+						  res.json({ status:402,message:'Server error, please try again!! '});
+					}					  
 				}else{
 					res.json({ status:402,message:"Invoice file not found"});
 				}
@@ -341,6 +365,23 @@ router.post('/smart-verify',[
 	}else{
 		res.json({ status:402,message:"Invalid invoice id"});
 	} 
+});
+
+router.get('/get-automl-json/:id', async (req, res) => {	
+	//console.log(req.body,'req-----innnn--'); 
+	var invoice_id = req.params.id;
+	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+	if(checkForHexRegExp.test(invoice_id)){
+		let invoice_list = await InvoiceModel.getEmployeeLogInvoiceDetails(invoice_id);
+		//console.log(invoice_list[0].image_name,'invoice_list--image_name');			
+		if(invoice_list.length > 0){
+			res.json({ status:200,invoice:invoice_list});
+		}else{
+			res.json({ status:402,message:"Invalid invoice id"});
+		}
+	}else{
+		res.json({ status:402,message:"Invalid invoice id"});
+	}
 });
 
 router.post('/manual-verify-invoice/:id', [    

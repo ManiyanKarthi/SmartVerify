@@ -463,3 +463,47 @@ exports.GetPredictionScore = (bill_response)=> {
 		}
 	})	
 }
+
+exports.CheckBillInformation = (old_bill_info,new_bill_info) => {
+	console.log(old_bill_info,'old_bill_info------>new_bill_info',new_bill_info,'-----');
+	return new Promise( (resolve, reject) => {
+		
+		if(old_bill_info.bill_no == new_bill_info.bill_no && old_bill_info.bill_amount == new_bill_info.bill_amount && old_bill_info.bill_date == new_bill_info.bill_date){
+			resolve(1);
+		}else{			
+			if(new_bill_info.bill_no =='' || new_bill_info.bill_amount==0 || new_bill_info.bill_number==''){
+				resolve({status:403,message:'Smart verify data missing'});
+			}else if(old_bill_info.bill_no != new_bill_info.bill_no ){
+				resolve({status:403,message:'Bill number not match'});
+			}else if(old_bill_info.bill_date != new_bill_info.bill_date){
+				resolve({status:403,message:'Bill date not match'});
+			}else if(old_bill_info.bill_amount != new_bill_info.bill_amount){
+				let bill_diff = parseFloat(new_bill_info.bill_amount) - parseFloat(old_bill_info.bill_amount);
+				if(bill_diff > 2 || bill_diff < -2 ){
+					resolve({status:403,message:'Bill amount difference'});
+				}else{
+					resolve(1);
+				}
+
+				/*if (new_bill_info.bill_amount < old_bill_info.bill_amount) {
+					let bill_diff = parseFloat(old_bill_info.bill_amount) - parseFloat(new_bill_info.bill_amount);
+					if(bill_diff>3){
+						resolve({status:403,message:'Bill amount difference'});
+					}else{
+						resolve(1);
+					}				    
+				}else{
+					let bill_diff = parseFloat(new_bill_info.bill_amount) - parseFloat(old_bill_info.bill_amount);
+					if(bill_diff>3){
+						resolve({status:403,message:'Bill amount difference'});
+					}else{
+						resolve(1);
+					}
+				}*/				
+			}else{
+				resolve({status:403,message:'Bill data not match'});
+			}		
+		}
+	})
+	
+}
