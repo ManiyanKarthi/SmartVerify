@@ -110,6 +110,12 @@ class FetchApi {
     props.method = "GET";
     fetchData(props);
   }
+
+  getAutoMLJSON(props){
+    props.url = this.baseurl + props.url;
+    props.method = "GET";
+    fetchData(props);
+  }
 }
 
 export default FetchApi;

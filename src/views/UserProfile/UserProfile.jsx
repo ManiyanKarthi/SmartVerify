@@ -19,12 +19,14 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Dialog from '@material-ui/core/Dialog';
 
 class UserProfile extends React.Component {
  
 	constructor(props){
 		super(props);
-		this.state = {billNo: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false, predictionData: {},
+		this.state = {billNo: "", billAmount:"", errorMessage:"", successMessage:"", employeeID:"", enableDetails: false, showLoaderImage: false, dialogStatus: false,
+					predictionData: {},
 					showSuccessMessage: false, showErrorMessage: false, homePageShowFlag: true, invoiceDataStatus: 10, autoMLStatus: {}, tableDetailedData: [],
 					billType: 0 , billDate:'', billStatus:'', automlPrediction:0, billImage:''};
 		this.state.tableColumns = [{"title":"Employee ID","field":"employee_no","type":"numeric"}, {"title":"Month","field":"bill_month","type":"numeric"},{"title":"Bill Submitted","field":"submitted","type":"numeric"},{"title":"Bill Rejected","field":"rejected","type":"numeric"},
@@ -45,7 +47,8 @@ class UserProfile extends React.Component {
 		this.rejectForm = this.rejectForm.bind(this);
 		this.zoomInImage = this.zoomInImage.bind(this);
 		this.zoomOutImage = this.zoomOutImage.bind(this);
-
+		this.openModal = this.openModal.bind(this);
+		this.closeDialog = this.closeDialog.bind(this);
 		this.zoomTimeout = undefined;
 
 		//verify_status - 0 (submitted), 1 (smart verify success), 2 (smart verify failed), 3 (manual verify), 4 (rejected), bill type - 1 (fuel), 2 (toll)	 
@@ -238,6 +241,18 @@ class UserProfile extends React.Component {
 		}});
 	}
 
+	openModal(){
+		let _this = this;
+		this.setState({"dialogStatus": true});
+		new FetchApi().getAutoMLJSON({body: {}, url: "/invoice/get-automl-json/"+ this.state.billID, success: function(res){
+			_this.setState({"predictionJSONdata":JSON.stringify(res)});
+		}});
+	}
+
+	closeDialog(){
+		this.setState({"dialogStatus": false});
+	}
+
 	zoomInImage(event){
 		var element = document.getElementById("overlay");
 		clearTimeout(this.zoomTimeout);
@@ -420,15 +435,6 @@ class UserProfile extends React.Component {
 									</Grid>
 									<Grid item xs={5}>
 										<label className="popupLabelValue">{this.state.billStatus}</label>&nbsp;
-										{
-											this.state.invoiceDataStatus > 0 ?
-											<span>
-												<a target="_blank" rel="noopener noreferrer" href={ new FetchApi().appendURL("/invoice/get-automl-json/"+ this.state.billID)}>
-													<InfoIcon style={{fill:"#1818c3", "verticalAlign":"text-bottom"}}/>
-												</a>
-											</span>
-											: null
-										}
 									</Grid>
 								</Grid> 
 								<Grid container className={"gridSpaceForm"} style={{"marginTop":"15px"}}>
@@ -438,12 +444,20 @@ class UserProfile extends React.Component {
 									<Grid item xs={5}>
 										<label>
 											{this.state.automlPrediction}
-										</label>&nbsp;
+										</label>&nbsp;&nbsp;
 										{
 											this.state.predictionData.billType ? 
 											<label>&nbsp;-&nbsp;
 												({this.state.predictionData.billType})
 											</label>
+											: null
+											
+										}
+										{
+											this.state.invoiceDataStatus > 0 ?
+											<span onClick={this.openModal} style={{"cursor":"pointer"}}>
+												<InfoIcon style={{fill:"#1818c3", "verticalAlign":"text-bottom"}}/>
+											</span>
 											: null
 										}
 									</Grid>
@@ -483,6 +497,16 @@ class UserProfile extends React.Component {
 					</Grid>
 				</Grid>	
 				<ToastsContainer store={ToastsStore}/>
+				<Dialog onClose={this.closeDialog} aria-labelledby="customized-dialog-title" open={this.state.dialogStatus}>
+					<div style={{"position":"absolute", "top":"0px", "right":"0px", "padding":"5px 10px", "cursor":"pointer"}} onClick={this.closeDialog}>
+						<span>X</span>
+					</div>
+					<Grid container style={{"padding":"20px"}}>
+						<pre style={{"maxWidth":"500px", "maxHeight":"400px", "overflow":"auto"}}>
+							{this.state.predictionJSONdata}
+						</pre>
+					</Grid>
+				</Dialog>
 			</Grid>
 		);
 	}
