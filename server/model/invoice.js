@@ -293,6 +293,9 @@ exports.getEmployeeLogInvoiceDetails = (invoice_id) => {
 					console.log(err,'err---'); //reject(err);
 					resolve([]);
 				}else{
+					if(invoice_result[0].vision_response && invoice_result[0].vision_response.textAnnotations[0].description){
+						invoice_result[0].vision_response = invoice_result[0].vision_response.textAnnotations[0].description;
+					}					
 					//console.log(res,'res---->');
 					resolve(invoice_result);
 				}
