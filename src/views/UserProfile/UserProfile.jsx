@@ -122,6 +122,7 @@ class UserProfile extends React.Component {
 				_this.setState({"autoMLStatus":{"showMessage": true, "state":"success", "message": data.message}});
 			}
 			else {
+				_this.onDetailedRowClick(_this.billDetailedClickedData, _this.updateDetailTable);
 				_this.setState({"autoMLStatus":{"showMessage": true, "state":"error", "message": data.message}});
 			}
 			_this.setState({"showLoaderImage": false});
