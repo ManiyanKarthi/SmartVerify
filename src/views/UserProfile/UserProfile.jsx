@@ -502,7 +502,7 @@ class UserProfile extends React.Component {
 						<span>X</span>
 					</div>
 					<Grid container style={{"padding":"20px"}}>
-						<pre style={{"maxWidth":"500px", "maxHeight":"400px", "overflow":"auto"}}>
+						<pre style={{"maxWidth":"500px", "maxHeight":"400px", "overflow":"auto", "whiteSpace":"pre-wrap"}}>
 							{this.state.predictionJSONdata}
 						</pre>
 					</Grid>
