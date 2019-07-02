@@ -253,7 +253,7 @@ exports.getLocationCount = () => {
 				planned:{$cond: { if: { $eq: [ "$load_status","Planned"] }, then: 1, else: 0 }},
 				open:{$cond: { if: { $eq: [ "$load_status","Open"] }, then: 1, else: 0 }},
 				active:{$cond: { if: { $eq: [ "$load_status","Active"] }, then: 1, else: 0 }},
-				removed:{$cond: { if: { $eq: [ "$load_status","Removed"] }, then: 1, else: 0 }},				     
+				removed:{$cond: { if: { $eq: [ "$load_status","Removed"] }, then: 1, else: 0 }}				     
 			}}, 
 			{$group : { 
 					_id :null,				 
@@ -270,7 +270,16 @@ exports.getLocationCount = () => {
 					resolve([]);
 				}else{
 					console.log(invoice_result,'res---->');
-					resolve(invoice_result);
+					db.get().collection('location').find({}).toArray( (err,location_res) => {
+						//console.log(location_res,'location_res---->');
+						if(err){
+							resolve(invoice_result);
+						}else{
+							invoice_result.location_res = location_res;
+							resolve(invoice_result);
+						}
+					})				
+					
 				}
 		});
 	});
