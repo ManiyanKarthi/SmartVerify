@@ -16,7 +16,7 @@ var appDir = require('app-root-path');
 
 const projectId = 'montgomery-242210';
 const computeRegion = 'us-central1';
-const modelId = 'ICN4062254011532076763';//'ICN8880303229401271842';//'ICN5128000347661266160';
+const modelId = 'ICN8977072380953784000';//'ICN4062254011532076763';//'ICN8880303229401271842';//'ICN5128000347661266160';
 const filePath = './public/images/sample_petrol_bill.jpg';
 const scoreThreshold = '0.6';
 const storeage_path = './server/public/images/invoice';
@@ -24,6 +24,7 @@ const storeage_url = 'images/invoice/';
 
 /* GET users listing. */
 router.get('/', async(req, res, next) => {
+	InvoiceModel.getLocationCount();
 	res.send('respond with a resource');
 });
 
@@ -530,8 +531,13 @@ router.get('/check_data', async (req,res,next) => {
 	if(invoice_res){
 		//console.log(invoice_res);
 		//_.lowerCase(invoice_res.data.textAnnotations[0].description)
-		var data_store = 'HP AUTO CARE CENTRE\nHPCL,S.NO:76/1, IPCOT\nUSERI,EGATTUR VILLAGE\nRUPORUR TALUK,KANCHI\nORIGINAL\n20-FEB-2019 10:43:16\nTXN NO : 9022017327\nINVOICE NO: 76017\nVEHICLE NO : NOT ENTERED\n**\n** ******\nNOZZLE NO : 2\nPRODUCT: POWER\nDENSITY: 748.7 kg/m3\nRATE : 76.81 INR/Ltr\nVOLUME: 4.50 Ltr\nAMOUNT: 345.64 INR\nThank You! Visit Again\n';//invoice_res.document_text_deduction.textAnnotations[0].description;
+		//var data_store = 'HP AUTO CARE CENTRE\nHPCL,S.NO:76/1, IPCOT\nUSERI,EGATTUR VILLAGE\nRUPORUR TALUK,KANCHI\nORIGINAL\n20-FEB-2019 10:43:16\nTXN NO : 9022017327\nINVOICE NO: 76017\nVEHICLE NO : NOT ENTERED\n**\n** ******\nNOZZLE NO : 2\nPRODUCT: POWER\nDENSITY: 748.7 kg/m3\nRATE : 76.81 INR/Ltr\nVOLUME: 4.50 Ltr\nAMOUNT: 345.64 INR\nThank You! Visit Again\n';//invoice_res.document_text_deduction.textAnnotations[0].description;
 		//var data_store = invoice_res.data.textAnnotations[0].description;
+		var data_store = "AR.CO\nalways done in your min\nor card details with anyo\nCroleum Dealer\n6:OKKIMPET OMR RD\nNO.:044 24581188\nOriginal\nDate:20:48:22 28/08/2018\nInvoice NO.:755778\nVehicle NÜ.: Not Entered\nNozzle:255\nProduct:Petrol\nUnit Rate:81.29RS./İ\nQuantity:33.3091\nTotal Amount:2707.69RS.\nS.T.Rey.No.\nM.S.T.Lic. No.\nTHANK YOU, PLEASE COME AGAIN\nCS Scanned with\nCamScanner\n";//"इंडियनऑयल\ncítibank\nIndian Oil\nWelcomes you\nTel. No.:\nVSB\nReceipt No.: K2253\nLocal ID : 00054848\nFIP No. : 01\nNozzle No. : 01\nProduct : Petrol\nPreset Type: Amount\nRate\n081.69\nvolume : 00024. 48\nAmount\n02000.00\ncítibank\nVehicle No: Not Entered\nMobile No : Not Entered\nDate : 05/11/18 Time: 20:46\nCST NO\nLSI NO\nVAT No:\nATTENDANT ID : Not Available\nFCC DATE: Not Available\nFCC TIME : Not Available\ncitibank\ncs Scanned withYou! Please visit Again\nCamScanner\n";
+
+		let bill_transaforms = await CommonModel.getTransformData(1,data_store);
+		res.json({status:200,data:bill_transaforms});
+		return false;
 		let search_store = data_store.replace(/\n/g, " ");
 		//console.log(search_store,'search_store---->');
 		let search_rate = search_store.search(/rate/i);

@@ -43,7 +43,8 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			let search_invoice_no = data_store.search(/invoice no/i);
 			let search_receipt_no = data_store.search(/receipt no/i);
 			let search_sale = data_store.search(/sale/i);
-			let search_amount = data_store.search(/amount/i);		
+			let search_amount = data_store.search(/amount/i);
+			let search_total = data_store.search(/total/i);					
 			
 			var invoice_text_value,bill_text_value,receipt_text_value;
 			if(search_invoice_no > 0){
@@ -54,7 +55,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					invoice_text_length = data_store.substr(search_invoice_no,search_invoice_line);
 				}
 				let invoice_number = invoice_text_length.replace(/invoice no/ig, '');
-				invoice_text_value = invoice_number.replace(':', "");			
+				invoice_text_value = invoice_number.replace(/[:.]/g, "");			
 				console.log(invoice_text_value,'<----invoice_text_value----->\n');			
 			}
 			
@@ -66,7 +67,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					bill_text_length = data_store.substr(search_bill_no,search_bill_line);
 				}
 				let bill_number = bill_text_length.replace(/bill no/ig, '');
-				bill_text_value = bill_number.replace(':', "");
+				bill_text_value = bill_number.replace(/[:.]/g, "");
 				//var invoice_text = data_store.substr(10,20);
 				//var invoice_text = data_store.slice(search_invoice_no, 5)
 				//var rest = invoice_text.substring(0, invoice_text.lastIndexOf("\n"));
@@ -81,7 +82,8 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					receipt_text_length = data_store.substr(search_receipt_no,search_receipt_line);
 				}
 				let receipt_number = receipt_text_length.replace(/receipt no/ig, '');
-				receipt_text_value = receipt_number.replace(':', "");			
+				//receipt_text_value = receipt_number.replace(':', "");
+				receipt_text_value = receipt_number.replace(/[:.]/g, "");			
 				console.log(receipt_text_value,'<----invoice_text_value----->\n');			
 			}
 			
@@ -97,7 +99,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				bill_number = receipt_text_value;
 			}
 			
-			var fuel_sales=0,fuel_amount =0;
+			var fuel_sales=0,fuel_amount =0,fuel_total=0;
 			if(search_sale){
 				var invoice_sale_text = data_store.substr(search_sale,20);
 				console.log('invoice_sale_text---',invoice_sale_text,'-----\n');
@@ -116,9 +118,10 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				}
 			}
 			
+			console.log('search_amount++++++',search_amount);
 			if(search_amount){
 				var invoice_amount_text = data_store.substr(search_amount,20);
-				console.log('invoice_amount_text---',invoice_amount_text,'-----\n');
+				console.log('invoice_amount_text---',invoice_amount_text,'<------>>>>\n');
 				let search_amount_line = invoice_amount_text.search('\n');
 				if(search_amount_line){				
 					invoice_amount_text = data_store.substr(search_amount,search_amount_line);
@@ -131,6 +134,36 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				if(amount_matches && amount_matches.length){
 					var fuel_amount = amount_matches[0];
 					console.log(amount_matches,'amount_matches');
+				}else{
+					var invoice_amount_search = data_store.substr(search_amount+6,50);
+					let search_amount_next = invoice_amount_search.search(/amount/i);
+					if(search_amount_next){
+						var invoice_amount_text = invoice_amount_search.substr(search_amount_next,20);
+						var amount_matches_next = invoice_amount_search.match(sale_regex);
+						console.log(amount_matches_next,'amount_matches----else case->');
+						if(amount_matches_next && amount_matches_next.length){
+							var fuel_amount = amount_matches_next[0];
+							console.log(amount_matches_next,'amount_matches_next---else--part');
+						}
+					}
+				}
+			}
+
+			if(search_total){
+				var invoice_total_text = data_store.substr(search_total,30);
+				console.log('invoice_total_text---',invoice_total_text,'-----\n');
+				let search_total_line = invoice_total_text.search('\n');
+				if(search_total_line){				
+					invoice_total_text = data_store.substr(search_sale,search_total_line);
+					//console.log(invoice_sale_text,'invoice_sale_text---');
+				}			
+				//invoice_sale_text = invoice_sale_text.replace(/rs./ig, '');
+				var sale_regex = /\d+(\.\d+)?/g; //float value			
+				var total_matches = invoice_total_text.match(sale_regex);
+				console.log(total_matches,'<---total_matches----->\n');
+				if(total_matches && total_matches.length){
+					var fuel_total = total_matches[0];
+					console.log(fuel_total,'fuel_total');
 				}
 			}
 			
@@ -139,6 +172,8 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				net_sales = fuel_amount;
 			}else if(fuel_sales>0){
 				net_sales = fuel_sales;
+			}else if(fuel_total>0){
+				net_sales = fuel_total;
 			}		
 			
 			//var str="some text 2012-01-01 some more text here 01-01-20 01-Mar-2020"; 
@@ -184,8 +219,9 @@ exports.getTransformData = (bill_type,bill_area)=> {
 		
 			//console.log(invoice_res);
 			//_.lowerCase(invoice_res.data.textAnnotations[0].description)
-			var data_store = 'National Highway Authority Of India\nSU TOLL ROAD LTD\nGST-33AAKCS7150GIZC\nSAC-996749\nToll Plaza Name : Nathakkarai\n| KM 73-760 NH-79\nSection\nKM45+765 To KM91+217\nTicket No : 1646231\nBooth & Operator: L7 rdinesh\nDate & Time 04/06/2019 05:37:00 PM\nVehicle No. TNO1AW8316\nType of Vehicle : Car/Jeep\nType of Journey : Single Journey\nFee\n: Rs.50.00\nOnly for overloaded vehicle\nStandard wt. of vehicle : 7875 kg.\nActual wt. of vehicle : 830 kg,\nOverloaded vehicle Fees : Rs.0.00\nHave a nice journey\nEmergency number: 9344779100\nScanned with\nCamScanner\n';//invoice_res.document_text_deduction.textAnnotations[0].description;
+			//var data_store = 'National Highway Authority Of India\nSU TOLL ROAD LTD\nGST-33AAKCS7150GIZC\nSAC-996749\nToll Plaza Name : Nathakkarai\n| KM 73-760 NH-79\nSection\nKM45+765 To KM91+217\nTicket No : 1646231\nBooth & Operator: L7 rdinesh\nDate & Time 04/06/2019 05:37:00 PM\nVehicle No. TNO1AW8316\nType of Vehicle : Car/Jeep\nType of Journey : Single Journey\nFee\n: Rs.50.00\nOnly for overloaded vehicle\nStandard wt. of vehicle : 7875 kg.\nActual wt. of vehicle : 830 kg,\nOverloaded vehicle Fees : Rs.0.00\nHave a nice journey\nEmergency number: 9344779100\nScanned with\nCamScanner\n';//invoice_res.document_text_deduction.textAnnotations[0].description;
 			//var data_store = invoice_res.data.textAnnotations[0].description;
+			var data_store = bill_area;
 			let search_store = data_store.replace(/\n/g, " ");
 			//console.log(search_store,'search_store---->');
 			let search_rate = search_store.search(/rate/i);
@@ -240,12 +276,12 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			}
 			
 			if(search_ticketid_no  > 0){
-				var ticketid_text_length = data_store.substr(search_ticket_id,20);
+				var ticketid_text_length = data_store.substr(search_ticketid_no,20);
 				let search_ticketid_line = ticketid_text_length.search('\n');			
-				if(search_ticketid_line){
+				/*if(search_ticketid_line){
 					console.log(search_ticketid_line,'search_ticketid_line---')
 					ticketid_text_length = data_store.substr(search_ticketid_no,search_ticketid_line);
-				}
+				}*/
 				let ticketid_number = ticketid_text_length.replace(/ticket id/ig, '');
 				ticketid_text_value = ticketid_number.replace(':', "");			
 				console.log(ticketid_text_value,'<....ticketid_text_value......>\n');
@@ -298,7 +334,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			
 			//ticket_text_value,ticketid_text_value,receiptno_text_value
 			
-			var toll_sales=0 , toll_amount =0 , fee_amount =0;
+			var toll_sales=0 , toll_amount =0 , fee_amount =0, toll_rate =0;
 			if(search_sale){
 				var invoice_sale_text = data_store.substr(search_sale,20);
 				console.log('invoice_sale_text---',invoice_sale_text,'-----\n');
@@ -354,6 +390,19 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					console.log(fee_amount,'fee_amount');
 				}
 			}
+
+			if(search_rate){
+				var invoice_rate_text = data_store.substr(search_rate,20);
+				console.log('invoice_rate_text---',invoice_rate_text,'-----\n');				
+				var sale_regex = /\d+(\.\d+)?/g; //float value			
+				var rate_matches = invoice_rate_text.match(sale_regex);
+				console.log(rate_matches,'fee_matches----->');
+				if(rate_matches && rate_matches.length){
+					//fuel_amount = parseFloat(amount_matches[0]);
+					toll_rate = rate_matches[0];
+					console.log(toll_rate,'toll_rate');
+				}
+			}
 			
 			console.log(fee_amount,'fee_amount >');	
 			
@@ -364,6 +413,8 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				net_sales=toll_amount;
 			}else if(toll_sales > 0){
 				net_sales=fee_amount;
+			}else if(toll_rate > 0){
+				net_sales=toll_rate;
 			}
 			
 			//var str="some text 2012-01-01 some more text here 01-01-20 01-Mar-2020"; 
@@ -389,11 +440,8 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					bill_date = date_match4[0];
 				}
 			}
-			if(net_sales){				
-				net_sales=net_sales.trim();				
-			}
 			
-			var reconization_data = {bill_number:bill_number.trim(),net_sales:net_sales,bill_date:bill_date.trim()};
+			var reconization_data = {bill_number:bill_number.trim(),net_sales:net_sales.trim(),bill_date:bill_date.trim()};
 			console.log(reconization_data,'bill data---');
 			
 			//*** Primary key factor in Fuel bills **/
