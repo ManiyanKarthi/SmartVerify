@@ -225,7 +225,7 @@ class Dashboard extends React.Component {
 							Add new bill
 						</Button>&nbsp;&nbsp;
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("SmartVerify")}} >
-							Smart Verify
+							Smart Extract
 						</Button>
 					</Grid>
 				</Grid>
