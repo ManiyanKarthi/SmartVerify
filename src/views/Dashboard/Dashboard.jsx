@@ -164,7 +164,7 @@ class Dashboard extends React.Component {
 				let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed', successMessage: ''};
 				_this.setState(updateObj);
 			}
-		}, timeout: 30000, onTimeout: function(){
+		}, onTimeout: function(){
 			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed due to timeout', successMessage: ''};
 			_this.setState(updateObj);
 		}});
