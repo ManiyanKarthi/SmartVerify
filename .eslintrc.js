@@ -12,6 +12,9 @@ module.exports = {
       jsx: true
     }
   },
+  rules: {
+    "no-console": "off"
+  },
   plugins: ["react"],
   extends: [
     "eslint:recommended",

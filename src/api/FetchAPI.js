@@ -29,6 +29,9 @@ function fetchData(props) {
         if(props.error){
           props.error(xhr.response);
         }
+        else{
+          console.error(xhr.response);
+        }
       }
     }
   };
