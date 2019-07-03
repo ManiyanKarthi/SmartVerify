@@ -152,7 +152,7 @@ class Dashboard extends React.Component {
 		new FetchApi().smartVerifyBill({body: paramObj, success: function(data){
 			_this.setState({"showLoaderImage": false});
 			if(data.status === 200){
-				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart verified'};
+				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart extract done'};
 				updateObj.billDate = data.prediction_data.date;
 				updateObj.billAmount = data.prediction_data.billed_amount;
 				updateObj.billNO = data.prediction_data.bill_number;
@@ -161,11 +161,11 @@ class Dashboard extends React.Component {
 				_this.setState(updateObj);
 			}
 			else{
-				let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed', successMessage: ''};
+				let updateObj = {showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart extract failed', successMessage: ''};
 				_this.setState(updateObj);
 			}
 		}, onTimeout: function(){
-			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart verify failed due to timeout', successMessage: ''};
+			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart extract failed due to timeout', successMessage: ''};
 			_this.setState(updateObj);
 		}});
 	}
