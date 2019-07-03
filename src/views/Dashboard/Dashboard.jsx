@@ -64,7 +64,6 @@ class Dashboard extends React.Component {
 	addNewBill() {
 		let _this = this;
 		let paramObj = { 
-			invoice_id: this.state.invoice_id,
 			employee_no: this.state.employeeID,
 			bill_month: this.state.billMonth,
 			bill_type: this.state.billType,
@@ -150,7 +149,7 @@ class Dashboard extends React.Component {
 		};
 		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
 		new FetchApi().smartVerifyBill({body: paramObj, success: function(data){
-			_this.setState({"showLoaderImage": false});
+			_this.setState({"showLoaderImage": false, "NewSmartVerify": false});
 			if(data.status === 200){
 				let updateObj = {showSuccessMessage: true, showErrorMessage: false, errorMessage:'', successMessage: 'Smart extract done'};
 				updateObj.billDate = data.prediction_data.date;
@@ -165,7 +164,7 @@ class Dashboard extends React.Component {
 				_this.setState(updateObj);
 			}
 		}, onTimeout: function(){
-			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart extract failed due to timeout', successMessage: ''};
+			let updateObj = {"showLoaderImage": false, showSuccessMessage: false, showErrorMessage: true, errorMessage:'Smart extract failed due to timeout', successMessage: '', "NewSmartVerify": false};
 			_this.setState(updateObj);
 		}});
 	}
