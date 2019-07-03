@@ -1,3 +1,12 @@
+.searchRightSideBox {
+    text-align: left;
+}
+
+@media only screen and (min-width: 960px) {
+    .searchRightSideBox {
+        text-align: right;
+    }
+}
 
 .fileInput{
     padding: 10px;
@@ -32,8 +41,6 @@
 }
 
 .overlayImageView {
-    /*display: block !important;
-    border: 1px solid black;*/
     position: absolute;
     right: 100%;
     width: 500px;

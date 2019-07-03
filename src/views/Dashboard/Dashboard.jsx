@@ -192,8 +192,8 @@ class Dashboard extends React.Component {
 
 		return (
 			<Grid container>
-				<Grid  item container xs={12}>
-					<Grid item container xs={7} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+				<Grid item container xs={12}>
+					<Grid item container xs={12} md={8} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
 						<Grid item>
 							<TextField label= {"Employee ID"} value={this.state.employeeID} 
 								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
@@ -219,11 +219,11 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item xs={5} style={{"padding":"20px", "textAlign":"right", "display": (this.state.showSearchContainer ? "" : "none") }}>
-						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} >
+					<Grid item xs={12} md={4} spacing={2} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
+						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} style={{"margin":"5px"}}>
 							Add new bill
 						</Button>&nbsp;&nbsp;
-						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("SmartVerify")}} >
+						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("SmartVerify")}} style={{"margin":"5px"}}>
 							Smart Extract
 						</Button>
 					</Grid>
