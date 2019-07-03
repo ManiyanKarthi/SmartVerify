@@ -245,7 +245,7 @@ router.post('/smart-verify',[
 				  InvoiceData.bill_date = billed_format_date;
 			  }
 			  
-			  let invoice_id = await InvoiceModel.InsertInvoice(InvoiceData); 	  
+			  let invoice_id = '';//await InvoiceModel.InsertInvoice(InvoiceData); 	  
 			  let prediction_data = {invoice_id:invoice_id,date:billed_disp_date,billed_amount:billed_amount,bill_number:bill_transaforms.bill_number,bill_type:bill_type};	  
 			  res.json({ status:200,message:'Smart verify successfully',prediction_data:prediction_data});
 		  }
