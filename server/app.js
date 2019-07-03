@@ -45,7 +45,8 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-const url = 'mongodb+srv://raj:mrs999111@cluster1-5ser0.gcp.mongodb.net/test?retryWrites=true&w=majority';//'mongodb://localhost:27017/smart_vision';
+//const url = 'mongodb+srv://raj:mrs999111@cluster1-5ser0.gcp.mongodb.net/test?retryWrites=true&w=majority';
+const url = 'mongodb://localhost:27017/smart_vision';
 const dbName = 'smart_vision';
 db.connect(url,dbName,function(err) {
   if (err) {
