@@ -52,7 +52,7 @@ function fetchData(props) {
 
 class FetchApi {
   constructor() {
-    this.baseurl = "http://cda48984.ngrok.io";
+    this.baseurl = "http://e967d478.ngrok.io";
     // this.baseurl = "http://localhost:3001";
   }
 

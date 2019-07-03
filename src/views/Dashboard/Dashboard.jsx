@@ -193,7 +193,7 @@ class Dashboard extends React.Component {
 		return (
 			<Grid container>
 				<Grid item container xs={12}>
-					<Grid item container xs={12} md={8} direction="row" spacing={2} style={{"padding":"0px 30px"}}>
+					<Grid item container xs={12} md={8} direction="row" spacing={2} className={"tableContainerGridBox"}>
 						<Grid item>
 							<TextField label= {"Employee ID"} value={this.state.employeeID} 
 								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}

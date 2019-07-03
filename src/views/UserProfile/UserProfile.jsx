@@ -278,7 +278,7 @@ class UserProfile extends React.Component {
 
 		return (
 			<Grid container>
-				<Grid xs={12} container item direction="row" spacing={2} style={{"padding":"0px 30px", "display":(this.state.homePageShowFlag ? "" : "none")}}>
+				<Grid xs={12} container item className={"tableContainerGridBox"} direction="row" spacing={2} style={{"display":(this.state.homePageShowFlag ? "" : "none")}}>
 					<Grid item>
 						<TextField label= {"Employee ID"} value={this.state.employeeID} 
 							onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
@@ -327,9 +327,9 @@ class UserProfile extends React.Component {
 							<span style={{"fontWeight":"bold"}}>Bill Month: </span><span>{this.state.clickedBillMonth}</span>
 						</Grid>
 					</Grid>
-					<Grid container spacing={2} style={{"padding":"20px"}}>
-						<Grid item xs={4} className={"gridSpaceContainer"}>
-							<Grid item xs={12} style={{"height":"100%"}}>
+					<Grid container spacing={2} style={{"padding":"20px", "overflow":"auto"}}>
+						<Grid item xs={12} md={4} className={"gridSpaceContainer"}>
+							<Grid item xs={12}>
 								<Table>
 									<TableHead>
 										<TableRow>
@@ -354,8 +354,8 @@ class UserProfile extends React.Component {
 								</Table>
 							</Grid>
 						</Grid>
-						<Grid container item xs={4} className={"gridSpaceContainer"}>
-							<Grid item xs={12} style={{"height":"100%"}}>
+						<Grid container item xs={12} md={4} className={"gridSpaceContainer"}>
+							<Grid item xs={12}>
 								<Grid container className={"gridSpaceForm"}>
 									<Grid item xs={7}>
 										<label className="popupLabelText">Bill Type:</label>
@@ -470,8 +470,8 @@ class UserProfile extends React.Component {
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid item xs={4} className={"gridSpaceContainer"}>
-							<Grid item xs={12} style={{"textAlign":"center", "position":"relative", "height":"100%", "overflow":"visible"}}>
+						<Grid item xs={12} md={4} className={"gridSpaceContainer"}>
+							<Grid item xs={12} style={{"textAlign":"center", "position":"relative", "overflow":"visible"}}>
 								<div id="overlay" style={{"display":"none", "backgroundImage":`url(${this.state.billImage})`}} 
 									className={"overlayImageView"} onMouseMove={this.zoomInImage}></div>
 								<img id="overlayOriginalImage" style={{"maxWidth":"100%", "maxHeight":"500px"}}  onMouseMove={this.zoomInImage} onMouseOut={this.zoomOutImage}
