@@ -219,7 +219,7 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item xs={12} md={4} spacing={2} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
+					<Grid item container xs={12} md={4} spacing={2} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} style={{"margin":"5px"}}>
 							Add new bill
 						</Button>&nbsp;&nbsp;
