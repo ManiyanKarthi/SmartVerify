@@ -32,6 +32,7 @@ const switchRoutes = (
         );
       }
     })}
+    <Redirect from="/admin" to="/admin/billsubmission" />
   </Switch>
 );
 

@@ -11,7 +11,7 @@ import { Select, MenuItem } from "@material-ui/core";
 import FetchApi from '../../api/FetchAPI';
 import Dialog from '@material-ui/core/Dialog';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
-import LoaderImg from '../../assets/img/Loader.svg'
+import LoaderImg from 'assets/img/Loader.svg'
 
 class Dashboard extends React.Component {
  

@@ -13,7 +13,7 @@ import Fab from '@material-ui/core/Fab';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import InfoIcon from '@material-ui/icons/Info';
 import {ToastsContainer, ToastsStore} from 'react-toasts';
-import LoaderImg from '../../assets/img/Loader.svg'
+import LoaderImg from 'assets/img/Loader.svg'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
