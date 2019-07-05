@@ -15,6 +15,7 @@
     "chartist": "0.10.1",
     "classnames": "2.2.6",
     "cookie-parser": "~1.4.4",
+    "copyfiles": "^2.1.0",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
@@ -50,7 +51,7 @@
   "scripts": {
     "start": "react-scripts start",
     "server": "nodemon server/bin/www",
-    "build": "react-scripts build",
+    "build": "react-scripts build && copyfiles -f config.xml build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
