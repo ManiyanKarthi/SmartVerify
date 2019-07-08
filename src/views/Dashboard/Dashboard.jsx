@@ -195,7 +195,7 @@ class Dashboard extends React.Component {
 				<Grid item container xs={12}>
 					<Grid item container xs={12} md={8} direction="row" spacing={2} className={"tableContainerGridBox"}>
 						<Grid item>
-							<TextField label= {"Employee ID"} value={this.state.employeeID} 
+							<TextField label= {"Employee ID"} value={this.state.employeeID} type={"number"}
 								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
 								onKeyPress={(e) => { if(e.key === "Enter") { this.serachEmployeeDetails(); } }}/>
 						</Grid>
@@ -219,11 +219,11 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item container xs={12} md={4} spacing={2} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
+					<Grid item xs={12} md={4} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} style={{"margin":"5px"}}>
 							Add new bill
 						</Button>&nbsp;&nbsp;
-						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("SmartVerify")}} style={{"margin":"5px"}}>
+						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("SmartVerify")}} style={{"margin":"5px", "display":"none"}}>
 							Smart Extract
 						</Button>
 					</Grid>

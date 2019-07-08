@@ -280,7 +280,7 @@ class UserProfile extends React.Component {
 			<Grid container>
 				<Grid xs={12} container item className={"tableContainerGridBox"} direction="row" spacing={2} style={{"display":(this.state.homePageShowFlag ? "" : "none")}}>
 					<Grid item>
-						<TextField label= {"Employee ID"} value={this.state.employeeID} 
+						<TextField label= {"Employee ID"} value={this.state.employeeID} type={"number"}
 							onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
 							onKeyPress={(e) => { if(e.key === "Enter") { this.serachEmployeeDetails(); }}}/>
 					</Grid>
