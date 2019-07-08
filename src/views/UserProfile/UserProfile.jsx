@@ -305,11 +305,13 @@ class UserProfile extends React.Component {
 					</Grid>
 					<Grid item xs={12}>
 						<div style={{"paddingTop":"20px","width":"100%"}} >
-							<MaterialTable
-							title=""
-							columns={this.state.tableColumns}
-							data={this.state.tableData}
-							onRowClick={this.onRowClick} />
+							{
+								(
+									this.state.tableData ? 
+									<MaterialTable title="" columns={this.state.tableColumns} data={this.state.tableData} onRowClick={this.onRowClick} />
+									: null
+								)
+							}
 						</div>
 					</Grid>
 				</Grid>
