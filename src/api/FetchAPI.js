@@ -37,7 +37,7 @@ function fetchData(props) {
   };
   xhr.open(props.method, props.url, true);
   xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-  xhr.timeout = props.timeout ? props.timeout : 60000;
+  xhr.timeout = props.timeout ? props.timeout : 180000;
   xhr.ontimeout = function() {
     if(props.onTimeout){
       props.onTimeout();

@@ -99,21 +99,50 @@ class Dashboard extends React.Component {
 
 	handleImageChange(e) {
 		let _this = this;
-		let reader = new FileReader();
 		let file = e.target.files[0];
-		reader.onloadend = () => {
-			this.setState({
-				file: file,
-				imagePreviewUrl: reader.result
-			}, function(){
-				if(this.state.NewSmartVerify){
-					_this.smartVerify();
-				}
+		if(file){
+			_this.compress(file, function(data){
+				_this.setState({
+					file: file,
+					imagePreviewUrl: data
+				}, function(){
+					if(this.state.NewSmartVerify){
+						_this.smartVerify();
+					}
+				});
 			});
 		}
-		if(file){
-			reader.readAsDataURL(file);
-		}
+	}
+
+	compress(file, callback) {
+		const width = 500;
+		const height = 500;
+		const fileName = file.name;
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = event => {
+			const img = new Image();
+			img.src = event.target.result;
+			img.onload = () => {
+				const elem = document.createElement('canvas');
+				elem.width = width;
+				elem.height = height;
+				const ctx = elem.getContext('2d');
+				ctx.drawImage(img, 0, 0, width, height);
+				ctx.canvas.toBlob((blob) => {
+					const file1 = new File([blob], fileName, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+					});
+					const reader1 = new FileReader();
+					reader1.readAsDataURL(file1);
+					reader1.onloadend = () => {
+						callback(reader1.result);
+					}
+				}, 'image/jpeg', 1);
+			};
+			reader.onerror = error => console.log(error);
+		};
 	}
 
 	serachEmployeeDetails(){
@@ -267,7 +296,7 @@ class Dashboard extends React.Component {
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center"}}>
 											<label>Bill Image </label>
-											<input className="fileInput" type="file" onChange={(e)=>this.handleImageChange(e)} />
+											<input className="fileInput" type="file" accept="image/*;capture=camera" onChange={(e)=>this.handleImageChange(e)} />
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center"}}>
 											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
