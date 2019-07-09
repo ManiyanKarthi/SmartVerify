@@ -101,22 +101,38 @@ class Dashboard extends React.Component {
 		let _this = this;
 		let file = e.target.files[0];
 		if(file){
-			_this.compress(file, function(data){
-				_this.setState({
-					file: file,
-					imagePreviewUrl: data
-				}, function(){
-					if(this.state.NewSmartVerify){
-						_this.smartVerify();
-					}
+			if(file.size > 600000){
+				_this.compress(file, function(data){
+					_this.setState({
+						file: file,
+						imagePreviewUrl: data
+					}, function(){
+						if(this.state.NewSmartVerify){
+							_this.smartVerify();
+						}
+					});
 				});
-			});
+			}
+			else {
+				const reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onloadend = () => {
+					_this.setState({
+						file: file,
+						imagePreviewUrl: reader.result
+					}, function(){
+						if(this.state.NewSmartVerify){
+							_this.smartVerify();
+						}
+					});
+				}
+			}
 		}
 	}
 
 	compress(file, callback) {
-		const width = 500;
-		const height = 500;
+		const width = 300;
+		// const height = 500;
 		const fileName = file.name;
 		const reader = new FileReader();
 		reader.readAsDataURL(file);
@@ -126,6 +142,7 @@ class Dashboard extends React.Component {
 			img.onload = () => {
 				const elem = document.createElement('canvas');
 				elem.width = width;
+				const height = (img.naturalHeight / img.naturalWidth) * width;
 				elem.height = height;
 				const ctx = elem.getContext('2d');
 				ctx.drawImage(img, 0, 0, width, height);
@@ -138,6 +155,7 @@ class Dashboard extends React.Component {
 					reader1.readAsDataURL(file1);
 					reader1.onloadend = () => {
 						callback(reader1.result);
+						// console.log(reader1.result);
 					}
 				}, 'image/jpeg', 1);
 			};
