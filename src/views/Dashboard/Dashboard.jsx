@@ -131,7 +131,7 @@ class Dashboard extends React.Component {
 	}
 
 	compress(file, callback) {
-		const width = 300;
+		const width = 500;
 		// const height = 500;
 		const fileName = file.name;
 		const reader = new FileReader();
