@@ -389,7 +389,7 @@ class UserProfile extends React.Component {
 										<label className="popupLabelText">Bill No:</label>
 									</Grid>
 									<Grid item xs={5}>
-										<TextField type="number" value={this.state.billNo} disabled={disableEdit}
+										<TextField value={this.state.billNo} disabled={disableEdit}
 											onChange={(e) => {this.setState({"billNo": e.currentTarget.value})}}/>
 										{
 											this.state.predictionData.billNo ? 
