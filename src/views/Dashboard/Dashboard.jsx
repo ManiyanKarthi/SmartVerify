@@ -266,7 +266,7 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item xs={12} md={4} className={"searchRightSideBox"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
+					<Grid item xs={12} md={4} className={"smTextAlignLeftRight"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} style={{"margin":"5px"}}>
 							Add new bill
 						</Button>&nbsp;&nbsp;
@@ -288,8 +288,8 @@ class Dashboard extends React.Component {
 										<span>X</span>
 									</div>
 									<Grid container justify="center" className="UI_Form_Container" style={{"padding":"20px"}}>
-										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<label style={{"marginLeft":"-10px"}}>Bill Type:</label>&nbsp;&nbsp;&nbsp;
+										<Grid item xs={12} sm={6} className={"smTextAlignLeftCenter smPadding5_15"}>
+											<label>Bill Type:</label>&nbsp;&nbsp;&nbsp;
 											<Select disabled={this.state.NewSmartVerify} style={{"padding":"8px"}}
 												value={this.state.billType} onChange={(e)=> {this.setState({"billType":e.target.value})}}>
 												{
@@ -303,18 +303,18 @@ class Dashboard extends React.Component {
 												}
 											</Select>
 										</Grid>
-										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
-											<TextField disabled={this.state.NewSmartVerify} label= {"Bill No"} type="number" value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
+										<Grid item xs={12} sm={6} className={"smTextAlignLeftCenter smPadding5_15"}>
+											<TextField disabled={this.state.NewSmartVerify} label= {"Bill No"} value={this.state.billNO} onChange={(e) => {this.setState({"billNO": e.currentTarget.value})}}/>
 										</Grid>
-										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+										<Grid item xs={12} sm={6} className={"smTextAlignLeftCenter smPadding5_15"}>
 											<TextField disabled={this.state.NewSmartVerify} label= {"Bill Date"} value={this.state.billDate} type={"date"} onChange={(e) => {this.setState({"billDate": e.currentTarget.value})}}/>
 										</Grid>
-										<Grid item xs={6} style={{"textAlign":"center", padding:"15px"}}>
+										<Grid item xs={12} sm={6} className={"smTextAlignLeftCenter smPadding5_15"}>
 											<TextField disabled={this.state.NewSmartVerify} label= {"Bill Amount"} type="number" value={this.state.billAmount} onChange={(e) => {this.setState({"billAmount": e.currentTarget.value})}}/>
 										</Grid>
-										<Grid item xs={12} style={{"textAlign":"center"}}>
+										<Grid item xs={12} className={"smTextAlignLeftCenter smPadding5_15"}>
 											<label>Bill Image </label>
-											<input className="fileInput" type="file" accept="image/*;capture=camera" onChange={(e)=>this.handleImageChange(e)} />
+											<input className="fileInput" type="file" accept="image" onChange={(e)=>this.handleImageChange(e)} />
 										</Grid>
 										<Grid item xs={12} style={{"textAlign":"center"}}>
 											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >

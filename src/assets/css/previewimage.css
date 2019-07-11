@@ -1,4 +1,12 @@
-.searchRightSideBox {
+.smPadding5_15{
+    padding: 5px;
+}
+
+.smTextAlignLeftRight {
+    text-align: left;
+}
+
+.smTextAlignLeftCenter {
     text-align: left;
 }
 
@@ -17,8 +25,16 @@
 }
 
 @media only screen and (min-width: 960px) {
-    .searchRightSideBox {
+    .smTextAlignLeftRight {
         text-align: right;
+    }
+
+    .smTextAlignLeftCenter {
+        text-align: center;
+    }
+    
+    .smPadding5_15{
+        padding: 15px;
     }
 
     .gridSpaceContainer{
@@ -35,9 +51,11 @@
 }
 
 .fileInput{
-    padding: 10px;
+    width: 180px;
+    padding: 10px 0px;
+    /*padding: 10px;
     margin: 15px;
-    cursor: pointer;
+    cursor: pointer;*/
 }
 
 .imgPreview{
