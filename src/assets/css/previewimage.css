@@ -6,6 +6,10 @@
     text-align: left;
 }
 
+.mdTextAlignLeftRight{
+    text-align: left;
+}
+
 .smTextAlignLeftCenter {
     text-align: left;
 }
@@ -24,7 +28,7 @@
     box-shadow: 0px 0px 10px #888888;
 }
 
-@media only screen and (min-width: 960px) {
+@media only screen and (min-width: 600px) {
     .smTextAlignLeftRight {
         text-align: right;
     }
@@ -47,6 +51,12 @@
 
     .tableContainerGridBox{
         padding: 0px 20px;
+    }
+}
+
+@media only screen and (min-width: 960px) {
+    .mdTextAlignLeftRight {
+        text-align: right;
     }
 }
 

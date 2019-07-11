@@ -72,6 +72,24 @@ class Dashboard extends React.Component {
 			bill_amount:this.state.billAmount,
 			bill_image:this.state.imagePreviewUrl
 		};
+
+		if(!paramObj.bill_no){
+			ToastsStore.error("Enter bill number");
+			return;
+		}
+		else if(!paramObj.bill_date){
+			ToastsStore.error("Enter bill date");
+			return;
+		}
+		else if(!paramObj.bill_amount){
+			ToastsStore.error("Enter bill amount");
+			return;
+		}
+		else if(!paramObj.bill_image){
+			ToastsStore.error("Enter bill image");
+			return;
+		}
+
 		this.setState({"showLoaderImage": true, showSuccessMessage: false, showErrorMessage: false});
 		new FetchApi().addNewBill({body: paramObj, success: function(data){
 			if(data.message === "Success"){
@@ -165,11 +183,17 @@ class Dashboard extends React.Component {
 
 	serachEmployeeDetails(){
 		let data = {emp_id: this.state.employeeID, month_year: this.state.billMonth};
+		const min = 3;
 		if(this.state.employeeID){
-			this.getInvoices(data);
+			if(this.state.employeeID.length >= min){
+				this.getInvoices(data);
+			}
+			else {
+				ToastsStore.error("Enter employee id minimum " + min + " characters");
+			}
 		}
 		else {
-			alert("Enter employee id");
+			ToastsStore.error("Enter employee id");
 		}
 	}
 
@@ -240,7 +264,7 @@ class Dashboard extends React.Component {
 		return (
 			<Grid container>
 				<Grid item container xs={12}>
-					<Grid item container xs={12} md={8} direction="row" spacing={2} className={"tableContainerGridBox"}>
+					<Grid item container xs={12} md={9} direction="row" spacing={2} className={"tableContainerGridBox"}>
 						<Grid item>
 							<TextField label= {"Employee ID"} value={this.state.employeeID} type={"number"}
 								onChange={(e) => {this.setState({"employeeID": e.currentTarget.value})}}
@@ -266,7 +290,7 @@ class Dashboard extends React.Component {
 							</Button>
 						</Grid>
 					</Grid>
-					<Grid item xs={12} md={4} className={"smTextAlignLeftRight"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
+					<Grid item xs={12} md={3} className={"mdTextAlignLeftRight"} style={{"padding":"10px 0px", "display": (this.state.showSearchContainer ? "" : "none") }}>
 						<Button variant="contained" color="primary"  onClick={() => {this.openDialog("NewBill")}} style={{"margin":"5px"}}>
 							Add new bill
 						</Button>&nbsp;&nbsp;
@@ -316,7 +340,7 @@ class Dashboard extends React.Component {
 											<label>Bill Image </label>
 											<input className="fileInput" type="file" accept="image" onChange={(e)=>this.handleImageChange(e)} />
 										</Grid>
-										<Grid item xs={12} style={{"textAlign":"center"}}>
+										<Grid item xs={12} className={"smTextAlignLeftCenter"} style={{"paddingTop":"20px"}}>
 											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
 												Add
 											</Button>&nbsp;&nbsp;
