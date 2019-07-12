@@ -31,6 +31,44 @@ class Dashboard extends React.Component {
 		this.closeDialog = this.closeDialog.bind(this);
 		this.getInvoices = this.getInvoices.bind(this);
 		this.serachEmployeeDetails = this.serachEmployeeDetails.bind(this);
+
+		/*setTimeout(() => {
+			const captureVideoButton = document.querySelector('#capture-button');
+			const cssFiltersButton = document.querySelector('#screenshot-button');
+			const video = document.querySelector('#video-view');
+
+			let filterIndex = 0;
+			const filters = [
+			'grayscale',
+			'sepia',
+			'blur',
+			'brightness',
+			'contrast',
+			'hue-rotate',
+			'hue-rotate2',
+			'hue-rotate3',
+			'saturate',
+			'invert',
+			''
+			];
+
+			captureVideoButton.onclick = function() {
+				navigator.mediaDevices.getUserMedia({video: true, audio: false}).
+					then(handleSuccess).catch(function(e){
+						console.error(e);
+						alert(e);
+					});
+			};
+
+			cssFiltersButton.onclick = video.onclick = function() {
+				video.className = filters[filterIndex++ % filters.length];
+			};
+
+			function handleSuccess(stream) {
+				video.srcObject = stream;
+				document.getElementById("video-view").play();
+			}
+		}, 2000);*/
 	}
 
 	generateBillMonth(){
@@ -119,7 +157,19 @@ class Dashboard extends React.Component {
 		let _this = this;
 		let file = e.target.files[0];
 		if(file){
-			if(file.size > 600000){
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onloadend = () => {
+				_this.setState({
+					file: file,
+					imagePreviewUrl: reader.result
+				}, function(){
+					if(this.state.NewSmartVerify){
+						_this.smartVerify();
+					}
+				});
+			}
+			/*if(file.size > 600000){
 				_this.compress(file, function(data){
 					_this.setState({
 						file: file,
@@ -131,20 +181,8 @@ class Dashboard extends React.Component {
 					});
 				});
 			}
-			else {
-				const reader = new FileReader();
-				reader.readAsDataURL(file);
-				reader.onloadend = () => {
-					_this.setState({
-						file: file,
-						imagePreviewUrl: reader.result
-					}, function(){
-						if(this.state.NewSmartVerify){
-							_this.smartVerify();
-						}
-					});
-				}
-			}
+			else {*/
+			/*}*/
 		}
 	}
 
@@ -260,6 +298,14 @@ class Dashboard extends React.Component {
 	}
 
 	render() {
+
+		/*<div>
+			<p><button id="capture-button">Capture video</button> </p>
+			<p><button id="screenshot-button">screenshot-button</button></p>
+			<p><button onClick={() => {alert(navigator.camera)}}>check</button></p>
+			<video id="video-view" style={{"width":"100px", "height":"100px"}}/>
+			<img id="image-view"/>
+		</div>*/
 
 		return (
 			<Grid container>

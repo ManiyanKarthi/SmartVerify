@@ -246,7 +246,7 @@ class UserProfile extends React.Component {
 		let _this = this;
 		this.setState({"dialogStatus": true});
 		new FetchApi().getAutoMLJSON({body: {}, url: "/invoice/get-automl-json/"+ this.state.billID, success: function(res){
-			_this.setState({"predictionJSONdata":JSON.stringify(res)});
+			_this.setState({"predictionJSONObject": res.invoice[0]});
 		}});
 	}
 
@@ -505,9 +505,40 @@ class UserProfile extends React.Component {
 						<span>X</span>
 					</div>
 					<Grid container style={{"padding":"20px"}}>
-						<pre style={{"maxWidth":"500px", "maxHeight":"400px", "overflow":"auto", "whiteSpace":"pre-wrap"}}>
-							{this.state.predictionJSONdata}
-						</pre>
+						{
+							this.state.predictionJSONObject ? 
+							<Grid item>
+								<div className={"predictionDataHeader"}>AutoML - Clasification</div>
+								<div className={"predictionDataValue"}>
+									{
+										this.state.predictionJSONObject.automl_prediction.payload.map(function(value, index){
+											return (<div key={index}>
+														<div>
+															<label>Name: </label>
+															<label>{value.displayName}</label>
+														</div>
+														<div>
+															<label>Score: </label>
+															<label>{value.classification.score}</label>
+														</div>
+													</div>)
+										})
+									}
+								</div>
+								<div className={"predictionDataHeader"}>AutoML - Validation</div>
+								<div className={"predictionDataValue"}>
+									<label>Message: </label>
+									<label>{this.state.predictionJSONObject.bill_transaforms.message}</label>
+								</div>
+								<div className={"predictionDataHeader"}>Vision API Extract</div>
+								<div className={"predictionDataValue"}>
+									<pre>
+										{this.state.predictionJSONObject.vision_response}
+									</pre>
+								</div>
+							</Grid>
+							: null
+						}
 					</Grid>
 				</Dialog>
 			</Grid>

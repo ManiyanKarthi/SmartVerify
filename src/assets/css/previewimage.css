@@ -14,6 +14,11 @@
     text-align: left;
 }
 
+
+.marginLeft_5{
+    margin-left: 5px;
+}
+
 .gridSpaceContainer{
     padding: 15px;
     border-radius: 8px;
@@ -60,12 +65,18 @@
     }
 }
 
+.predictionDataHeader{
+    margin: 15px 0px 10px 0px;
+    font-weight: 500;
+}
+
+.predictionDataValue{
+    margin-left: 10px;
+}
+
 .fileInput{
     width: 180px;
     padding: 10px 0px;
-    /*padding: 10px;
-    margin: 15px;
-    cursor: pointer;*/
 }
 
 .imgPreview{
