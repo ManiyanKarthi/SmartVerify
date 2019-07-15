@@ -33,9 +33,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(express.static(path.join(__dirname,'build')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/invoice', invoiceRouter);
+
+app.get('/*',(req,res)=>{
+  res.sendFile(path.join(__dirname,'build/index.html'))
+});
 
 // const db_url = 'mongodb://localhost:27017/smart_vision';
 //app.use(expressMongoDb(db_url));
@@ -45,26 +50,19 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-//const url = 'mongodb+srv://raj:mrs999111@cluster1-5ser0.gcp.mongodb.net/test?retryWrites=true&w=majority';
-const url = 'mongodb://localhost:27017/smart_vision';
+const url = 'mongodb+srv://rajuser:SmartVision@cluster1-5ser0.gcp.mongodb.net/test?retryWrites=true&w=majority';
+//const url = 'mongodb://localhost:27017/smart_vision';
 const dbName = 'smart_vision';
 db.connect(url,dbName,function(err) {
   if (err) {
     console.log('Unable to connect to Mongo.')
-    process.exit(1)
+    //process.exit(1)
   } else {
 	  /*db.get().collection('invoice').findOne({type:1},(err, res)=> {
 		console.log(res,'res---');
 	  })*/
   }
 });
-
-var a='2018-07-26';var b='2018-07-26';
-if(a==b){
-  console.log(a,'truueee');
-}else{
-  console.log(a,'falsee');
-}
 
 /*
 const url = 'mongodb://localhost:27017/smart_vision';

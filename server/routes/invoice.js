@@ -298,6 +298,7 @@ router.post('/smart-verify',[
 						  console.log(response);	  
 						  var bill_type = await CommonModel.BillType(response); 
 						  var bill_prediction_data = await CommonModel.GetPredictionScore(response);
+						  var bill_prediction_type = await CommonModel.GetPredictionType(response);
 						  //console.log(bill_type,'bill_type--->');
 						  const client_detection = new vision.ImageAnnotatorClient();
 						  const [doc_result] = await client_detection.documentTextDetection(filePath_Loc);
@@ -354,10 +355,17 @@ router.post('/smart-verify',[
 								  res.json({ status:status,message:message,prediction_response:prediction_res});						  
 							  }
 						  }else{
-						  	 	let bill_transaforms_up = {prediction:bill_prediction_data,message:'"SmartVerify failed : Bill classification mismatch'};
+
+						  	 	var actualBillID = await CommonModel.GetBillID(bill_prediction_type);
+						  		if(bill_prediction_data <= 0.8 && old_bill_type==actualBillID){
+						  			var error_msg = 'SmartVerify failed : classification threshold failed due to less prediction on ',bill_prediction_data;
+						  		}else{
+						  			var error_msg = 'SmartVerify failed : Bill classification mismatch';
+						  		}
+						  	 	let bill_transaforms_up = {prediction:bill_prediction_data,message:error_msg};
 						  		InvoiceData = {verify_status:2,bill_transaforms:bill_transaforms_up,automl_prediction:response,vision_response:doc_result,updated_at:new Date()};							  
 								let invoice_res = await InvoiceModel.UpdateInvoice(invoice_id,InvoiceData);
-								res.json({ status:402,message:"SmartVerify failed : Bill classification mismatch ",bill_prediction:bill_prediction_data});
+								res.json({ status:402,message:error_msg,bill_prediction:bill_prediction_data});
 						  }
 				 	} catch (error) {		  
 						  //console.log(error,'error--->');

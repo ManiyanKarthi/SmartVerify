@@ -7,7 +7,7 @@ exports.BillType = (bill_response)=> {
 		//console.log(bill_response,'bill_response',response,'response');
 		var bill_type=0;
 		if(response.payload.length > 0 && response.payload[0].displayName && response.payload[0].classification.score){		
-		  if(response.payload[0].classification.score>0.8){			  
+		  if(response.payload[0].classification.score >= 0.8){			  
 			  if(response.payload[0].displayName=='FuelBill'){
 				  bill_type = 1;
 				  console.log(1,'BillType');				  
@@ -424,13 +424,22 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			var pattern4=/[0-9][0-9][./-][0-9][0-9][./-][0-9][0-9]/gi; //01-01-20
 			//console.log(data_store.match(pattern2));
 			var date_match = data_store.match(pattern2);
-			var date_match2 = data_store.match(pattern3);
+			var date_match2 = data_store.match(pattern3);			
 			
 			var bill_date = '';
 			if(date_match && date_match.length>0){
 				bill_date = date_match[0];
+				var date_str = bill_date;
+				console.log(date_str,'date_str');
+				var date_arr = date_str.split(/[./-]+/);
+				bill_date = date_arr[2]+'-'+date_arr[1]+'-'+date_arr[0];
 			}else if(date_match2 && date_match2.length>0){
-				bill_date = date_match2[0];			
+				bill_date = date_match2[0];	
+				var date_arr = bill_date.split(/[./-]+/);
+				var date_obj = new Date(bill_date);
+				console.log(date_obj);
+				let month_date = (date_obj.getMonth() + 1);
+				bill_date = date_arr[2]+'-'+month_date+'-'+date_arr[0];						
 			}else{
 				var date_match3 = data_store.match(pattern);
 				var date_match4 = data_store.match(pattern4);
@@ -438,6 +447,9 @@ exports.getTransformData = (bill_type,bill_area)=> {
 					bill_date = date_match3[0];
 				}else if(date_match4 && date_match4.length >0){
 					bill_date = date_match4[0];
+					var date_str = bill_date;
+					var date_arr = date_str.split(/[./-]+/);
+					bill_date = '20'+date_arr[2]+'-'+date_arr[1]+'-'+date_arr[0];
 				}
 			}
 			
@@ -498,6 +510,21 @@ exports.GetBillType = (bill_type)=> {
 		return status_res;	
 }
 
+exports.GetBillID = (bill_type)=> {	
+		var status_res;
+		switch (bill_type) {		  
+		  case "Fuel":
+			status_res = 1;
+			break;
+		  case "Toll":
+			status_res = 2;
+			break;		 
+		  default:
+			status_res=3;
+		}
+		return status_res;	
+}
+
 exports.GetPredictionScore = (bill_response)=> {	
 	return new Promise( (resolve, reject) => {
 		var response = bill_response;
@@ -505,6 +532,20 @@ exports.GetPredictionScore = (bill_response)=> {
 		if(response && response.payload.length > 0 && response.payload[0].displayName && response.payload[0].classification.score){	
 			//console.log(response.payload[0].classification.score,'response.payload[0].classification.score');
 			resolve(parseFloat(response.payload[0].classification.score).toFixed(3));
+		}else{
+			//console.log(bill_type,'BillType');
+			resolve(0);
+		}
+	})	
+}
+
+exports.GetPredictionType = (bill_response)=> {	
+	return new Promise( (resolve, reject) => {
+		var response = bill_response;
+		//console.log(bill_response,'bill_response',response,'response');		
+		if(response && response.payload.length > 0 && response.payload[0].displayName){	
+			//console.log(response.payload[0].classification.score,'response.payload[0].classification.score');
+			resolve(response.payload[0].displayName);
 		}else{
 			//console.log(bill_type,'BillType');
 			resolve(0);
