@@ -387,13 +387,13 @@ class Dashboard extends React.Component {
 											<input className="fileInput" type="file" accept="image" onChange={(e)=>this.handleImageChange(e)} />
 										</Grid>
 										<Grid item xs={12} className={"smTextAlignLeftCenter"} style={{"paddingTop":"20px"}}>
-											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} >
+											<Button variant="contained" color="primary" onClick={(e)=>this.addNewBill(e)} disabled={this.state.showLoaderImage}>
 												Add
 											</Button>&nbsp;&nbsp;
 											<Button variant="contained" color="default" onClick={(e)=>this.smartVerify(e)} style={{"display": "none"}}>
 												Smart Verify
 											</Button>&nbsp;&nbsp;
-											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} >
+											<Button variant="contained" color="default" onClick={(e)=>this.clearForm(e)} disabled={this.state.showLoaderImage}>
 												Clear
 											</Button>
 										</Grid>

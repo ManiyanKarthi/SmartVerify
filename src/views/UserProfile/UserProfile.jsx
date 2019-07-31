@@ -487,11 +487,11 @@ class UserProfile extends React.Component {
 							Smart Verify
 						</Button>&nbsp;&nbsp;
 						<Button variant="contained" color="primary" disabled={this.state.showLoaderImage}
-							onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
+							onClick={(e)=>this.manualVerify(e)} style={{"display":(this.state.invoiceDataStatus > 2 || this.state.invoiceDataStatus === 1 ? "none":"")}}>
 							Manual Verify
 						</Button>&nbsp;&nbsp;
 						<Button variant="contained" color="default" disabled={this.state.showLoaderImage}
-							onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 ? "none":"")}}>
+							onClick={(e)=>this.rejectForm(e)} style={{"display":(this.state.invoiceDataStatus > 2 || this.state.invoiceDataStatus === 1 ? "none":"")}}>
 							Reject
 						</Button>&nbsp;&nbsp;
 						<button style={{"width":"100px", "height":"36px", "backgroundColor":"transparent", "border":"none", "verticalAlign":"middle"}}>
