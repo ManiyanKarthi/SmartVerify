@@ -59,11 +59,13 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				console.log(invoice_text_value,'<----invoice_text_value----->\n');			
 			}
 			
+			//console.log(search_bill_no,'search_bill_no---')
 			if(search_bill_no  > 0){
-				var bill_text_length = data_store.substr(search_bill_no,20);
-				let search_bill_line = bill_text_length.search('\n');			
+				var bill_text_length = data_store.substr(search_bill_no,25);
+				let search_bill_line = bill_text_length.search('\n');	
+				//console.log(bill_text_length,'bill_text_length---')				
 				if(search_bill_line){
-					//console.log(search_bill_line,'search_bill_line---')
+					console.log(search_bill_line,'search_bill_line---')
 					bill_text_length = data_store.substr(search_bill_no,search_bill_line);
 				}
 				let bill_number = bill_text_length.replace(/bill no/ig, '');
@@ -119,7 +121,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			}
 			
 			console.log('search_amount++++++',search_amount);
-			if(search_amount){
+			if(search_amount && search_amount>0){
 				var invoice_amount_text = data_store.substr(search_amount,20);
 				console.log('invoice_amount_text---',invoice_amount_text,'<------>>>>\n');
 				let search_amount_line = invoice_amount_text.search('\n');
@@ -513,10 +515,10 @@ exports.GetBillType = (bill_type)=> {
 exports.GetBillID = (bill_type)=> {	
 		var status_res;
 		switch (bill_type) {		  
-		  case "Fuel":
+		  case "FuelBill":
 			status_res = 1;
 			break;
-		  case "Toll":
+		  case "TollBill":
 			status_res = 2;
 			break;		 
 		  default:

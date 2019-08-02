@@ -307,6 +307,8 @@ router.post('/smart-verify',[
 						  console.log(bill_area,'bill_area');			  
 						  
 						  if(old_bill_type==bill_type){
+
+						  	console.log(old_bill_type,'old_bill_type---bill_type',bill_type);
 							  
 							  let bill_transaforms = await CommonModel.getTransformData(bill_type,bill_area);						  
 							  if(bill_transaforms==0){
@@ -355,10 +357,14 @@ router.post('/smart-verify',[
 								  res.json({ status:status,message:message,prediction_response:prediction_res});						  
 							  }
 						  }else{
-
+						  		
+						  		if(bill_prediction_data && bill_prediction_data!=''){
+						  			bill_prediction_data = parseFloat(bill_prediction_data).toFixed(2);
+						  		}
 						  	 	var actualBillID = await CommonModel.GetBillID(bill_prediction_type);
+						  	 	console.log(old_bill_type,'old_bill_type---actualBillID',actualBillID,'bill_prediction_data--',bill_prediction_data,'--bill_prediction_type--',bill_prediction_type);
 						  		if(bill_prediction_data <= 0.8 && old_bill_type==actualBillID){
-						  			var error_msg = 'SmartVerify failed : classification threshold failed due to less prediction on ',bill_prediction_data;
+						  			var error_msg = 'SmartVerify failed : classification threshold failed due to less prediction on '+bill_prediction_data+' at '+bill_prediction_type;
 						  		}else{
 						  			var error_msg = 'SmartVerify failed : Bill classification mismatch';
 						  		}
@@ -542,6 +548,8 @@ router.get('/check_data', async (req,res,next) => {
 		//var data_store = 'HP AUTO CARE CENTRE\nHPCL,S.NO:76/1, IPCOT\nUSERI,EGATTUR VILLAGE\nRUPORUR TALUK,KANCHI\nORIGINAL\n20-FEB-2019 10:43:16\nTXN NO : 9022017327\nINVOICE NO: 76017\nVEHICLE NO : NOT ENTERED\n**\n** ******\nNOZZLE NO : 2\nPRODUCT: POWER\nDENSITY: 748.7 kg/m3\nRATE : 76.81 INR/Ltr\nVOLUME: 4.50 Ltr\nAMOUNT: 345.64 INR\nThank You! Visit Again\n';//invoice_res.document_text_deduction.textAnnotations[0].description;
 		//var data_store = invoice_res.data.textAnnotations[0].description;
 		var data_store = "AR.CO\nalways done in your min\nor card details with anyo\nCroleum Dealer\n6:OKKIMPET OMR RD\nNO.:044 24581188\nOriginal\nDate:20:48:22 28/08/2018\nInvoice NO.:755778\nVehicle NÜ.: Not Entered\nNozzle:255\nProduct:Petrol\nUnit Rate:81.29RS./İ\nQuantity:33.3091\nTotal Amount:2707.69RS.\nS.T.Rey.No.\nM.S.T.Lic. No.\nTHANK YOU, PLEASE COME AGAIN\nCS Scanned with\nCamScanner\n";//"इंडियनऑयल\ncítibank\nIndian Oil\nWelcomes you\nTel. No.:\nVSB\nReceipt No.: K2253\nLocal ID : 00054848\nFIP No. : 01\nNozzle No. : 01\nProduct : Petrol\nPreset Type: Amount\nRate\n081.69\nvolume : 00024. 48\nAmount\n02000.00\ncítibank\nVehicle No: Not Entered\nMobile No : Not Entered\nDate : 05/11/18 Time: 20:46\nCST NO\nLSI NO\nVAT No:\nATTENDANT ID : Not Available\nFCC DATE: Not Available\nFCC TIME : Not Available\ncitibank\ncs Scanned withYou! Please visit Again\nCamScanner\n";
+		
+		var data_store = "यनऑयल\nIndian Oil\nBill No: Jul-20341-ORGNL\nTrns. ID:\nAtnd. ID:\nReceipt: Physical Receipt\nVehi. No:NotEntered\nMob.No : NotEntered\nDate : 19/07/2019\nTime :09:08:09\nFP. ID :3\nNozl No:3\nFuel\nPreset :Rs.200\nRate :Rs.76.25\nSale :Rs.200.00\nVolume :2.62Lts.\nScanned with\nCamScanner\n";
 
 		let bill_transaforms = await CommonModel.getTransformData(1,data_store);
 		res.json({status:200,data:bill_transaforms});
