@@ -266,7 +266,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			}
 			
 			if(search_ticket_no  > 0){
-				var ticket_text_length = data_store.substr(search_ticket_no,20);
+				var ticket_text_length = data_store.substr(search_ticket_no,30);
 				let search_ticket_line = ticket_text_length.search('\n');			
 				if(search_ticket_line){
 					console.log(search_ticket_line,'search_ticket_line---')
@@ -280,12 +280,12 @@ exports.getTransformData = (bill_type,bill_area)=> {
 			if(search_ticketid_no  > 0){
 				var ticketid_text_length = data_store.substr(search_ticketid_no,20);
 				let search_ticketid_line = ticketid_text_length.search('\n');			
-				/*if(search_ticketid_line){
+				if(search_ticketid_line){
 					console.log(search_ticketid_line,'search_ticketid_line---')
 					ticketid_text_length = data_store.substr(search_ticketid_no,search_ticketid_line);
-				}*/
+				}
 				let ticketid_number = ticketid_text_length.replace(/ticket id/ig, '');
-				ticketid_text_value = ticketid_number.replace(':', "");			
+				ticketid_text_value = ticketid_number.replace(':', "");				
 				console.log(ticketid_text_value,'<....ticketid_text_value......>\n');
 			}
 			
@@ -328,7 +328,7 @@ exports.getTransformData = (bill_type,bill_area)=> {
 				bill_number = ticket_text_value;
 			}else if(ticketid_text_value){
 				console.log(ticketid_text_value,'ticketid_text_value');
-				bill_number = ticketid_text_value;
+				bill_number = ticketid_text_value.trim();
 			}else if(receiptno_text_value){
 				console.log(receiptno_text_value,'receiptno_text_value');
 				bill_number = receiptno_text_value;
